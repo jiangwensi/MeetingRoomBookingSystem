@@ -1,3 +1,9 @@
+SELECT * FROM user;
+select * from user_role;
+select * from token;
+delete from user_role where role_id = 1 and user_id = 32;
+
+
 drop procedure if exists delete_user;
 delimiter $$
 create procedure delete_user(in theEmail text)
@@ -15,5 +21,3 @@ begin
     select concat("deleted ",ROW_COUNT()," rows");
 end$$
 delimiter ;
-
-call delete_user("jiangwensi@hotmail.com");
