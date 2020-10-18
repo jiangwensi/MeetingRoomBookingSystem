@@ -2,12 +2,14 @@ package com.jiangwensi.mrbs.service;
 
 import com.jiangwensi.mrbs.dto.RoleDto;
 import com.jiangwensi.mrbs.dto.UserDto;
+import com.jiangwensi.mrbs.entity.TokenEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
 
 public interface UserService extends UserDetailsService {
+    void removeObsoleteToken(List<TokenEntity> tokenEntities);
     UserDto findUserByEmail(String email);
 
     UserDto createUser(String name, String email, String password,String returnUrl);

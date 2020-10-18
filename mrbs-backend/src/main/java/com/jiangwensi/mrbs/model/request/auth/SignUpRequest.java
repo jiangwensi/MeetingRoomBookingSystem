@@ -43,7 +43,7 @@ public class SignUpRequest {
 
     @Override
     public String toString() {
-        String maskedPassword = (password == null) ? null : password.replaceAll("*", "*");
+        String maskedPassword = (password == null) ? null : password.replaceAll("\\*", "*");
         return "SignUpRequest{" +
                 "name='" + name + '\'' +
                 ", email='" + email + '\'' +

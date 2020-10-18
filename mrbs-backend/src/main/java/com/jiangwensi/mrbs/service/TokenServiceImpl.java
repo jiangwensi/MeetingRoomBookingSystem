@@ -6,7 +6,7 @@ import com.jiangwensi.mrbs.dto.VerifyEmailTokenDto;
 import com.jiangwensi.mrbs.entity.TokenEntity;
 import com.jiangwensi.mrbs.entity.UserEntity;
 import com.jiangwensi.mrbs.enumeration.TokenType;
-import com.jiangwensi.mrbs.exception.NotFoundException;
+import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.UnknownErrorException;
 import com.jiangwensi.mrbs.repo.TokenRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
@@ -38,7 +38,7 @@ public class TokenServiceImpl implements TokenService {
 
         if (tokenEntity == null) {
             logger.error("unable to find token " + token);
-            throw new NotFoundException("Token is invalid");
+            throw new InvalidInputException("Token is invalid or this email has already been verified.");
         }
 
         UserEntity userEntity = tokenEntity.getUser();
@@ -108,7 +108,7 @@ public class TokenServiceImpl implements TokenService {
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setToken(emailVerificationToken);
         tokenEntity.setUser(userEntity);
-        tokenEntity.setType(TokenType.VERIFY_EMAIL.toString());
+        tokenEntity.setType(TokenType.VERIFY_EMAIL.name());
         tokenEntity.setReturnUrl(changeEmailReturnUrl);
 //            tokenEntities.add(tokenEntity);
         tokenRepository.save(tokenEntity);

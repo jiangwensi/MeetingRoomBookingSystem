@@ -44,7 +44,7 @@ public class SESServiceImpl implements SESService {
 
         loadProperties();
 
-        String subject = "Verify Email to Sign Up Meeting Room Booking System";
+        String subject = "[MRBS] Verify Email to Sign Up Meeting Room Booking System";
         String htmlBody = "<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
                 "<head>\n" +

@@ -10,7 +10,6 @@ import com.jiangwensi.mrbs.enumeration.RoleName;
 import com.jiangwensi.mrbs.enumeration.TokenType;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
-import com.jiangwensi.mrbs.model.response.user.UserResponseItem;
 import com.jiangwensi.mrbs.repo.RoleRepository;
 import com.jiangwensi.mrbs.repo.TokenRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
@@ -47,6 +46,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private TokenRepository tokenRepository;
+
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -95,7 +98,7 @@ public class UserServiceImpl implements UserService {
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setToken(emailVerificationToken);
         tokenEntity.setUser(userEntity);
-        tokenEntity.setType(TokenType.VERIFY_EMAIL.toString());
+        tokenEntity.setType(TokenType.VERIFY_EMAIL.name());
         tokenEntity.setReturnUrl(returnUrl);
 
         userEntity.getTokens().add(tokenEntity);
@@ -120,25 +123,33 @@ public class UserServiceImpl implements UserService {
         userEntity.setPassword(passwordEnc);
 
         List<TokenEntity> tokenEntities = userEntity.getTokens();
+        userService.removeObsoleteToken(tokenEntities);
+
+        TokenEntity tokenEntity = new TokenEntity();
+        tokenEntity.setToken(emailVerificationToken);
+        tokenEntity.setUser(userEntity);
+        tokenEntity.setType(TokenType.VERIFY_EMAIL.name());
+        tokenEntity.setReturnUrl(returnUrl);
+        tokenEntities.add(tokenEntity);
+
+        UserEntity savedUserEntity = userRepository.save(userEntity);
+//        UserDto returnValue = new ModelMapper().map(savedUserEntity, UserDto.class);
+        UserDto returnValue = new UserDto();
+        MyModelMapper.userEntityToUserDtoModelMapper().map(savedUserEntity, returnValue);
+        return returnValue;
+    }
+
+
+    @Override
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void removeObsoleteToken(List<TokenEntity> tokenEntities) {
         for (TokenEntity tokenEntity : tokenEntities) {
-            if (tokenEntity.getType().equals(TokenType.VERIFY_EMAIL)) {
+            if (tokenEntity.getType().equals(TokenType.VERIFY_EMAIL.name())) {
                 tokenRepository.delete(tokenEntity);
                 tokenEntities.remove(tokenEntity);
                 break;
             }
         }
-
-        TokenEntity tokenEntity = new TokenEntity();
-        tokenEntity.setToken(emailVerificationToken);
-        tokenEntity.setUser(userEntity);
-        tokenEntity.setType(TokenType.VERIFY_EMAIL.toString());
-        tokenEntity.setReturnUrl(returnUrl);
-        tokenEntities.add(tokenEntity);
-
-        UserEntity savedUserEntity = userRepository.save(userEntity);
-        UserDto returnValue = new ModelMapper().map(savedUserEntity, UserDto.class);
-
-        return returnValue;
     }
 
     @Override
@@ -181,15 +192,15 @@ public class UserServiceImpl implements UserService {
 
         } else if (!nameEmpty && emailEmpty) {
 
-            userEntities = userRepository.searchByName(name,role,active,verified);
+            userEntities = userRepository.searchByName(name, role, active, verified);
 
         } else if (nameEmpty && !emailEmpty) {
 
-            userEntities = userRepository.searchByEmail(email,role,active,verified);
+            userEntities = userRepository.searchByEmail(email, role, active, verified);
 
         } else if (nameEmpty && emailEmpty) {
 
-            userEntities = userRepository.search(role,active,verified);
+            userEntities = userRepository.search(role, active, verified);
 
 //            userEntities = IteratorUtils.toList(userRepository.findAll().iterator());
 
@@ -246,8 +257,8 @@ public class UserServiceImpl implements UserService {
         if (!MyStringUtils.isEmpty(name)) {
             userEntity.setName(name);
         }
-        userEntity=userRepository.save(userEntity);
-        UserDto returnValue = new ModelMapper().map(userEntity,UserDto.class);
+        userEntity = userRepository.save(userEntity);
+        UserDto returnValue = new ModelMapper().map(userEntity, UserDto.class);
 //        MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity, returnValue);
 
         return returnValue;
@@ -258,18 +269,18 @@ public class UserServiceImpl implements UserService {
     public void updateUser(String publicId, String name, List<String> roles, Boolean active) {
 
         UserEntity userEntity = userRepository.findByPublicId(publicId);
-        if(userEntity==null){
-            throw new NotFoundException("Unable to find user by id:"+publicId);
+        if (userEntity == null) {
+            throw new NotFoundException("Unable to find user by id:" + publicId);
         }
         userEntity.setName(name);
         userEntity.setActive(active);
 
         List<RoleEntity> oldRoleEntities = userEntity.getRoles();
         List<RoleEntity> newRoleEntities = new ArrayList<>();
-        for(String str: roles){
+        for (String str : roles) {
             RoleEntity re = roleRepository.findByName(str);
-            if(re==null){
-                throw new InvalidInputException("Wrong role:"+str);
+            if (re == null) {
+                throw new InvalidInputException("Wrong role:" + str);
             }
             newRoleEntities.add(re);
         }
@@ -292,7 +303,7 @@ public class UserServiceImpl implements UserService {
     public UserDto updateMyProfile(String publicId, String name, String email, String changeEmailReturnUrl) {
         UserEntity userEntity = userRepository.findByPublicId(publicId);
         boolean emailUpdated = false;
-        if(!MyStringUtils.isEmpty(email) && !email.toUpperCase().equals(userEntity.getEmail().toUpperCase())){
+        if (!MyStringUtils.isEmpty(email) && !email.toUpperCase().equals(userEntity.getEmail().toUpperCase())) {
             if (MyStringUtils.isEmpty(changeEmailReturnUrl)) {
                 throw new InvalidInputException("changeEmailReturnUrl is not set to validate updated email");
             }
@@ -313,13 +324,13 @@ public class UserServiceImpl implements UserService {
 
         }
 
-        if(!MyStringUtils.isEmpty(name)){
+        if (!MyStringUtils.isEmpty(name)) {
             userEntity.setName(name);
             userEntity = userRepository.save(userEntity);
         }
 
         UserDto returnValue = new UserDto();
-                MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity, returnValue);
+        MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity, returnValue);
 
         return returnValue;
 
@@ -383,7 +394,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         UserPrincipal returnValue = new UserPrincipal();
-        returnValue.setEnabled(userEntity.isActive()&&userEntity.isEmailVerified());
+        returnValue.setEnabled(userEntity.isActive() && userEntity.isEmailVerified());
         returnValue.setPassword(userEntity.getPassword());
         returnValue.setUsername(userEntity.getEmail());
         returnValue.setName(userEntity.getName());
