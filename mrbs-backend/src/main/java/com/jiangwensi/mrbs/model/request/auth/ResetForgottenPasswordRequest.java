@@ -34,7 +34,7 @@ public class ResetForgottenPasswordRequest {
 
     @Override
     public String toString() {
-        String maskedPassword = (password == null) ? null : password.replaceAll("*", "*");
+        String maskedPassword = (password == null) ? null : password.replaceAll("\\*", "*");
         return "ResetForgottenPasswordRequest{" +
                 "token='" + token + '\'' +
                 ", email='" + email + '\'' +

@@ -35,8 +35,8 @@ public class ResetPasswordRequest {
     @Override
     public String toString() {
 
-        String maskedOldPassword = (oldPassword == null) ? null : oldPassword.replaceAll("*", "*");
-        String maskedNewPassword = (newPassword == null) ? null : newPassword.replaceAll("*", "*");
+        String maskedOldPassword = (oldPassword == null) ? null : oldPassword.replaceAll("\\*", "*");
+        String maskedNewPassword = (newPassword == null) ? null : newPassword.replaceAll("\\*", "*");
 
         return "ResetPasswordRequest{" +
                 "email='" + email + '\'' +
