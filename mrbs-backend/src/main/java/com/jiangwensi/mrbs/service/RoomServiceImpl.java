@@ -5,20 +5,23 @@ import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.dto.RoomDto;
 import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.*;
+import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
 import com.jiangwensi.mrbs.model.request.room.BlockedTimeSlot;
 import com.jiangwensi.mrbs.repo.*;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by Jiang Wensi on 25/8/2020
@@ -48,7 +51,7 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomDto> returnValue = new ArrayList<>();
 //        List<RoomEntity> roomEntities = roomRepo.searchRoom(name, active);
-        List<RoomEntity> roomEntities = roomRepo.searchRoom(name,orgName, active);
+        List<RoomEntity> roomEntities = roomRepo.searchRoom(name, orgName, active);
 
         if (roomEntities == null) {
             throw new NotFoundException("Unable to find room by name:" + name + ",active=" + active);
@@ -86,12 +89,17 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public RoomDto createRoom(String name, Integer capacity, String facilities, String description, Boolean active,
                               String organization,
-                              List<String> admins, List<BlockedTimeSlot> blockedTimeslots) {
+                              List<String> admins, List<BlockedTimeSlot> blockedTimeslots, MultipartFile[] roomImages) throws IOException {
         log.info("createRoom name:" + name + ",capacity:" + capacity + ",facilities:" + facilities + ",description:" + description +
-                ",active:" + active + ",admins:" + admins == null ? "" : String.join(" ", admins));
+                ",active:" + active + ",admins:" + admins == null ? "" :
+                String.join(" ", admins) + ",roomImages.length=" + roomImages.length);
 
+        if (roomRepo.findByRoomNameAndOrgPublicId(name, organization) != null) {
+            throw new InvalidInputException("There is an existing room with the same name in this organization. " +
+                    "Please try a different name");
+        }
         RoomDto returnValue = new RoomDto();
-        RoomEntity roomEntity = new RoomEntity(UUID.randomUUID().toString());
+        RoomEntity roomEntity = new RoomEntity();
         roomEntity.setName(name);
         roomEntity.setCapacity(capacity);
         roomEntity.setFacilities(facilities);
@@ -115,20 +123,31 @@ public class RoomServiceImpl implements RoomService {
             if (organizationEntity == null) {
                 throw new NotFoundException("Unable to find organiztion by id:" + organization);
             }
+
             roomEntity.setOrganization(organizationEntity);
         }
 
-        roomEntity = roomRepo.save(roomEntity);
+        List<RoomImageEntity> roomImageEntities = new ArrayList<RoomImageEntity>();
+        for(int i = 0; i < roomImages.length; i++){
+            RoomImageEntity e = new RoomImageEntity();
+            e.setImage(ArrayUtils.toObject(roomImages[i].getBytes()));
+            e.setRoom(roomEntity);
+            roomImageEntities.add(e);
+        }
+        roomEntity.setRoomImages(roomImageEntities);
 
-        if(blockedTimeslots !=null && blockedTimeslots.size()>0){
-            for(BlockedTimeSlot b: blockedTimeslots){
+        List<BlockedTimeslotEntity> blockedTimeSlots = new ArrayList<>();
+        if (blockedTimeslots != null && blockedTimeslots.size() > 0) {
+            for (BlockedTimeSlot b : blockedTimeslots) {
                 BlockedTimeslotEntity e = new BlockedTimeslotEntity();
-                new ModelMapper().map(b,e);
+                new ModelMapper().map(b, e);
                 e.setRoom(roomEntity);
-                blockTimeslotRepo.save(e);
+                blockedTimeSlots.add(e);
             }
         }
+        roomEntity.setBlockedTimeslots(blockedTimeSlots);
 
+        roomEntity = roomRepo.save(roomEntity);
 
         ModelMapper mm = MyModelMapper.roomEntityToDtoModelMapper();
         mm.map(roomEntity, returnValue);
@@ -142,7 +161,7 @@ public class RoomServiceImpl implements RoomService {
                               Boolean active,
                               String organization,
                               List<String> admins,
-                              List<String> users,List<BlockedTimeSlot> blockedTimeslots) {
+                              List<String> users, List<BlockedTimeSlot> blockedTimeslots) {
         log.info("updateRoom publicId:" + publicId + ",name:" + name + ",capacity:" + capacity + ",facilities:" + facilities + "," +
                 "description:" + description + ",active:" + active + ",admins:" + admins == null ? "" : String.join(" ", admins));
 
@@ -192,7 +211,7 @@ public class RoomServiceImpl implements RoomService {
             roomEntity.setAdmins(userEntities);
         }
 
-        if (users != null ) {
+        if (users != null) {
             List<UserEntity> userEntities = new ArrayList<UserEntity>();
             users.forEach(e -> {
                 UserEntity userEntity = userRepo.findByPublicId(e);
@@ -206,14 +225,14 @@ public class RoomServiceImpl implements RoomService {
 
         roomEntity = roomRepo.save(roomEntity);
 
-        if(blockedTimeslots!=null){
+        if (blockedTimeslots != null) {
             //remove old slots
             blockTimeslotRepo.deleteAll(roomEntity.getBlockedTimeslots());
 
             //add updated slots
-            for(BlockedTimeSlot b:blockedTimeslots){
+            for (BlockedTimeSlot b : blockedTimeslots) {
                 BlockedTimeslotEntity e = new BlockedTimeslotEntity();
-                new ModelMapper().map(b,e);
+                new ModelMapper().map(b, e);
                 e.setRoom(roomEntity);
                 blockTimeslotRepo.save(e);
             }
@@ -236,8 +255,8 @@ public class RoomServiceImpl implements RoomService {
             throw new NotFoundException("Unable to find room by id:" + publicId);
         }
         List<BlockedTimeslotEntity> slots = roomEntity.getBlockedTimeslots();
-        if(slots!=null){
-            slots.forEach(b->blockTimeslotRepo.delete(b));
+        if (slots != null) {
+            slots.forEach(b -> blockTimeslotRepo.delete(b));
         }
         roomRepo.delete(roomEntity);
     }
@@ -372,15 +391,15 @@ public class RoomServiceImpl implements RoomService {
 
         List<BookingEntity> bookings = roomEntity.getBookings();
 
-        if(bookings==null){
-            throw new NotFoundException("There is no bookings in room "+roomPublicId);
+        if (bookings == null) {
+            throw new NotFoundException("There is no bookings in room " + roomPublicId);
         }
 
         List<BookingDto> retrunValue = new ArrayList<>();
 
-        for(BookingEntity be: bookings){
+        for (BookingEntity be : bookings) {
             BookingDto bookingDto = new BookingDto();
-            MyModelMapper.bookingEntityToDtoModelMapper().map(be,bookingDto);
+            MyModelMapper.bookingEntityToDtoModelMapper().map(be, bookingDto);
             retrunValue.add(bookingDto);
         }
 

@@ -5,7 +5,10 @@ import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.dto.RoomDto;
 import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.model.request.room.BlockedTimeSlot;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -16,15 +19,20 @@ public interface RoomService {
 
     RoomDto viewRoom(String publicId);
 
+//    RoomDto createRoom(String name, Integer capacity, String facilities, String description, Boolean active,
+//                       String organization,
+//                       List<String> admins,List<BlockedTimeSlot> blockedTimeslots);
+
+    @Transactional
     RoomDto createRoom(String name, Integer capacity, String facilities, String description, Boolean active,
                        String organization,
-                       List<String> admins,List<BlockedTimeSlot> blockedTimeslots);
+                       List<String> admins, List<BlockedTimeSlot> blockedTimeslots, MultipartFile[] roomImages) throws IOException;
 
     RoomDto updateRoom(String publicId, String name, Integer capacity, String facilities, String description,
                        Boolean active,
                        String organization,
                        List<String> admins,
-                       List<String> users,List<BlockedTimeSlot> blockedTimeslots);
+                       List<String> users, List<BlockedTimeSlot> blockedTimeslots);
 
     void deleteRoom(String publicId);
 

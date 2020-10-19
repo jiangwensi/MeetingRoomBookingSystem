@@ -103,8 +103,9 @@ public class UserServiceImpl implements UserService {
 
         userEntity.getTokens().add(tokenEntity);
         UserEntity savedUserEntity = userRepository.save(userEntity);
-        UserDto returnValue = new ModelMapper().map(savedUserEntity, UserDto.class);
-
+//        UserDto returnValue = new ModelMapper().map(savedUserEntity, UserDto.class);
+        UserDto returnValue = new UserDto();
+        MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity,returnValue);
         roleEntity.getUsers().add(userEntity);
         roleRepository.save(roleEntity);
 

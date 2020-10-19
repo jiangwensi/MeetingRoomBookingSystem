@@ -18,6 +18,7 @@ public class RoomRequest {
     private List<String> admins = new ArrayList<>();
     private String orgPublicId;
     private List<BlockedTimeSlot> blockedTimeslots = new ArrayList<>();
+//    private MultipartFile roomImage;
 
     public String getPublicId() {
         return publicId;
@@ -98,6 +99,15 @@ public class RoomRequest {
     public void setBlockedTimeslots(List<BlockedTimeSlot> blockedTimeslots) {
         this.blockedTimeslots = blockedTimeslots;
     }
+
+
+    //    public InputStream getRoomImage() {
+//        return roomImage;
+//    }
+//
+//    public void setRoomImage(InputStream roomImage) {
+//        this.roomImage = roomImage;
+//    }
 
     @Override
     public String toString() {

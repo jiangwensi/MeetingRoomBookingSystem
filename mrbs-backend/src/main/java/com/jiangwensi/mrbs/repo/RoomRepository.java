@@ -21,4 +21,9 @@ public interface RoomRepository extends CrudRepository<RoomEntity,Long> {
                                 @Param("orgName") String orgName, @Param("active") Boolean active);
 
     RoomEntity findByPublicId(String publicId);
+
+    @Query(nativeQuery = true,
+            value = "select r.* from room r join org o on r.org_id = o.id and o.public_id = :orgPublicId and r.name =" +
+                    " :roomName")
+    RoomEntity findByRoomNameAndOrgPublicId(@Param("roomName") String roomName, @Param("orgPublicId") String orgPublicId);
 }

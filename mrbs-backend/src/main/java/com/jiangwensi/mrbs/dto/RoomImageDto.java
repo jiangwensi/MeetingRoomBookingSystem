@@ -5,7 +5,7 @@ package com.jiangwensi.mrbs.dto;
  */
 public class RoomImageDto {
     private String id;
-    private RoomDto room;
+//    private RoomDto room;
     private Byte[] image;
 
     public String getId() {
@@ -16,13 +16,13 @@ public class RoomImageDto {
         this.id = id;
     }
 
-    public RoomDto getRoom() {
-        return room;
-    }
-
-    public void setRoom(RoomDto room) {
-        this.room = room;
-    }
+//    public RoomDto getRoom() {
+//        return room;
+//    }
+//
+//    public void setRoom(RoomDto room) {
+//        this.room = room;
+//    }
 
     public Byte[] getImage() {
         return image;

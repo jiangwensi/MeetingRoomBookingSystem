@@ -1,6 +1,7 @@
 package com.jiangwensi.mrbs.entity;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 /**
  * Created by Jiang Wensi on 15/8/2020
@@ -13,7 +14,7 @@ public class RoomImageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="room_id")
     private RoomEntity room;
 
@@ -22,6 +23,10 @@ public class RoomImageEntity {
 
     @Column(nullable = false)
     private String publicId;
+
+    public RoomImageEntity() {
+        this.publicId = UUID.randomUUID().toString();
+    }
 
     public String getPublicId() {
         return publicId;

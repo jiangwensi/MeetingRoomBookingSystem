@@ -3,6 +3,7 @@ package com.jiangwensi.mrbs.entity;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Jiang Wensi on 15/8/2020
@@ -40,8 +41,8 @@ public class RoomEntity {
     @JoinColumn(name = "org_id")
     private OrganizationEntity organization;
 
-    @OneToOne(mappedBy = "room")
-    private RoomImageEntity roomImage;
+    @OneToMany(mappedBy = "room",cascade = CascadeType.ALL)
+    private List<RoomImageEntity> roomImages;
 
     @ManyToMany
     @JoinTable(
@@ -59,11 +60,12 @@ public class RoomEntity {
     )
     private List<UserEntity> users;
 
-    @OneToMany(mappedBy="room")
+    @OneToMany(mappedBy="room",cascade = CascadeType.ALL)
     private List<BlockedTimeslotEntity> blockedTimeslots;
 
 
     public RoomEntity() {
+        this.publicId = UUID.randomUUID().toString();
     }
 
     public RoomEntity(String publicId) {
@@ -134,12 +136,12 @@ public class RoomEntity {
         this.organization = organization;
     }
 
-    public RoomImageEntity getRoomImage() {
-        return roomImage;
+    public List<RoomImageEntity> getRoomImages() {
+        return roomImages;
     }
 
-    public void setRoomImage(RoomImageEntity roomImage) {
-        this.roomImage = roomImage;
+    public void setRoomImages(List<RoomImageEntity> roomImages) {
+        this.roomImages = roomImages;
     }
 
     public String getName() {

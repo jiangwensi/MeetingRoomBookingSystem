@@ -27,10 +27,13 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,14 +57,14 @@ public class RoomController {
     OrgService orgService;
 
     @GetMapping
-    public SearchRoomResponse search(@RequestParam(required = false,value="roomName") String name,
-                                     @RequestParam(required = false,value="orgName") String orgName,
+    public SearchRoomResponse search(@RequestParam(required = false, value = "roomName") String name,
+                                     @RequestParam(required = false, value = "orgName") String orgName,
                                      @RequestParam(required = false) Boolean active) {
         log.info("search name:" + name + ",active:" + active);
 
         List<RoomDto> roomDtos = roomService.searchRoom(name, orgName, active);
 
-        roomDtos.stream().filter(e-> isOrgAdminAccessingRoom(e.getPublicId())||isRoomAdminAccessingRoom(e.getPublicId())|| isUserAccessingRoom(e.getPublicId()));
+        roomDtos.stream().filter(e -> isOrgAdminAccessingRoom(e.getPublicId()) || isRoomAdminAccessingRoom(e.getPublicId()) || isUserAccessingRoom(e.getPublicId()));
 
         List<SearchRoomResponseItem> items = new ModelMapper().map(roomDtos,
                 new TypeToken<List<SearchRoomResponseItem>>() {
@@ -78,8 +81,8 @@ public class RoomController {
     @GetMapping("/{publicId}")
     public RoomResponse viewRoom(@PathVariable String publicId) {
         log.info("viewRoom publicId:" + publicId);
-        if(!isOrgAdminAccessingRoom(publicId) && !isRoomAdminAccessingRoom(publicId) && !isUserAccessingRoom(publicId)){
-            throw new AccessDeniedException("You are not allowed to view room "+publicId);
+        if (!isOrgAdminAccessingRoom(publicId) && !isRoomAdminAccessingRoom(publicId) && !isUserAccessingRoom(publicId)) {
+            throw new AccessDeniedException("You are not allowed to view room " + publicId);
         }
         RoomDto roomDto = roomService.viewRoom(publicId);
         RoomResponse returnValue = new RoomResponse();
@@ -93,17 +96,18 @@ public class RoomController {
 
     @GetMapping("/{publicId}/availableTimeslots/{date}")
     public AvailableTimeslotResponse listAvailableTimeslots(@PathVariable("publicId") String roomPublicId,
-                                                            @PathVariable String date){
-        List<AvailableTimeslotDto> availableTimeslotDtos = roomService.listAvailableTimeslots(roomPublicId,date);
+                                                            @PathVariable String date) {
+        List<AvailableTimeslotDto> availableTimeslotDtos = roomService.listAvailableTimeslots(roomPublicId, date);
 
         AvailableTimeslotResponse returnValue = new AvailableTimeslotResponse();
         return returnValue;
     }
 
     @GetMapping("/{publicId}/users")
-    public SearchUserResponse listRoomUsers(@PathVariable("publicId") String roomPublicId){
+    public SearchUserResponse listRoomUsers(@PathVariable("publicId") String roomPublicId) {
         List<UserDto> userDtos = roomService.listRoomUsers(roomPublicId);
-        List<UserResponse> userResponses = new ModelMapper().map(userDtos,new TypeToken<ArrayList<UserResponse>>(){}.getType());
+        List<UserResponse> userResponses = new ModelMapper().map(userDtos, new TypeToken<ArrayList<UserResponse>>() {
+        }.getType());
         SearchUserResponse returnValue = new SearchUserResponse();
         returnValue.setUsers(userResponses);
         returnValue.setStatus(MyResponseStatus.success.name());
@@ -111,9 +115,10 @@ public class RoomController {
     }
 
     @GetMapping("/{publicId}/admins")
-    public SearchUserResponse listRoomAdmins(@PathVariable("publicId") String roomPublicId){
+    public SearchUserResponse listRoomAdmins(@PathVariable("publicId") String roomPublicId) {
         List<UserDto> userDtos = roomService.listRoomAdmins(roomPublicId);
-        List<UserResponse> userResponses = new ModelMapper().map(userDtos,new TypeToken<ArrayList<UserResponse>>(){}.getType());
+        List<UserResponse> userResponses = new ModelMapper().map(userDtos, new TypeToken<ArrayList<UserResponse>>() {
+        }.getType());
         SearchUserResponse returnValue = new SearchUserResponse();
         returnValue.setUsers(userResponses);
         returnValue.setStatus(MyResponseStatus.success.name());
@@ -121,19 +126,22 @@ public class RoomController {
     }
 
     @GetMapping("/{publicId}/bookings")
-    public SearchBookingResponse listRoomBookings(@PathVariable("publicId") String roomPublicId){
+    public SearchBookingResponse listRoomBookings(@PathVariable("publicId") String roomPublicId) {
         List<BookingDto> bookingDtos = roomService.listRoomBookings(roomPublicId);
         List<SearchBookingResponseItem> bookings = new ModelMapper().map(bookingDtos,
-                new TypeToken<ArrayList<SearchBookingResponseItem>>(){}.getType());
+                new TypeToken<ArrayList<SearchBookingResponseItem>>() {
+                }.getType());
         SearchBookingResponse returnValue = new SearchBookingResponse();
         returnValue.setBookings(bookings);
         returnValue.setStatus(MyResponseStatus.success.name());
         return returnValue;
     }
 
-    @PostMapping
-    public RoomResponse createRoom(@RequestBody RoomRequest request) {
-        log.info("createRoom "+request.toString());
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public RoomResponse createRoom(@RequestPart(value = "roomImage", required = false) MultipartFile[] roomImages
+            , @RequestPart(value = "roomData") RoomRequest request
+    ) throws IOException {
+        log.info("createRoom " + request.toString());
         String name = request.getName();
         Integer capacity = request.getCapacity();
         String facilities = request.getFacilities();
@@ -143,15 +151,14 @@ public class RoomController {
         List<String> admins = request.getAdmins();
         List<BlockedTimeSlot> blockedTimeslots = request.getBlockedTimeslots();
 
-        if(!isAccessingMyOrg(organization)){
-            throw new AccessDeniedException("You are not allowed to create room for organization "+organization);
+        if (!isAccessingMyOrg(organization)) {
+            throw new AccessDeniedException("You are not allowed to create room for this organization " + organization);
         }
 
-        RoomDto roomDto = roomService.createRoom(name,capacity,facilities,description,active,organization,admins,
-                blockedTimeslots);
-
+        RoomDto roomDto = roomService.createRoom(name, capacity, facilities, description, active, organization, admins,
+                blockedTimeslots, roomImages);
         RoomResponse returnValue = new RoomResponse();
-        new ModelMapper().map(roomDto, returnValue);
+//        new ModelMapper().map(roomDto, returnValue);
 
         returnValue.setStatus(MyResponseStatus.success.name());
         returnValue.setMessage("Create room is successful");
@@ -160,9 +167,9 @@ public class RoomController {
 
     @PatchMapping
     public RoomResponse updateRoom(@RequestBody RoomRequest request) {
-        log.info("updateRoom "+request.toString());
+        log.info("updateRoom " + request.toString());
         String publicId = request.getPublicId();
-        if(!isAccessingMyRoomOrgAdmin(publicId)){
+        if (!isAccessingMyRoomOrgAdmin(publicId)) {
             throw new AccessDeniedException("You are not allowed to edit this room");
         }
         String name = request.getName();
@@ -175,8 +182,8 @@ public class RoomController {
         List<String> users = request.getUsers();
         List<BlockedTimeSlot> blockedTimeslots = request.getBlockedTimeslots();
 
-        RoomDto roomDto = roomService.updateRoom(publicId,name,capacity,facilities,description,active,organization,
-                admins,users,blockedTimeslots);
+        RoomDto roomDto = roomService.updateRoom(publicId, name, capacity, facilities, description, active, organization,
+                admins, users, blockedTimeslots);
 
         RoomResponse returnValue = new RoomResponse();
         new ModelMapper().map(roomDto, returnValue);
@@ -186,36 +193,37 @@ public class RoomController {
         return returnValue;
     }
 
-    @PatchMapping(path="/{roomId}/users")
+    @PatchMapping(path = "/{roomId}/users")
     public RoomUserResponse enrollUser(@PathVariable String roomId, @RequestBody RoomUserRequest request) {
-        log.info("enrollUser roomId:"+roomId+","+request.toString());
+        log.info("enrollUser roomId:" + roomId + "," + request.toString());
 
-        if(!isOrgAdminAccessingRoom(roomId) && !isRoomAdminAccessingRoom(roomId)){
+        if (!isOrgAdminAccessingRoom(roomId) && !isRoomAdminAccessingRoom(roomId)) {
             throw new AccessDeniedException("You are not allowed to enroll user for this room");
         }
 
         RoomUserResponse returnValue = new RoomUserResponse();
         String action = MyStringUtils.toUpperCaseAndTrim(request.getAction());
         List<UserDto> userDtos = new ArrayList<UserDto>();
-        switch (action){
+        switch (action) {
             case "list":
                 userDtos = roomService.listEnrolledUsers(roomId);
                 populateRoomUserResponse(returnValue, userDtos, "List room's user is successful");
                 return returnValue;
             case "enroll":
-                userDtos = roomService.enrollUser(roomId,request.getUsers());
+                userDtos = roomService.enrollUser(roomId, request.getUsers());
                 populateRoomUserResponse(returnValue, userDtos, "Enroll user in room is successful");
                 return returnValue;
             case "unenroll":
-                userDtos = roomService.unenrollUser(roomId,request.getUsers());
+                userDtos = roomService.unenrollUser(roomId, request.getUsers());
                 populateRoomUserResponse(returnValue, userDtos, "Unenroll user from room is successful");
                 return returnValue;
-            default: throw new InvalidInputException("Invalid action:"+action);
+            default:
+                throw new InvalidInputException("Invalid action:" + action);
         }
     }
 
     public void populateRoomUserResponse(RoomUserResponse returnValue, List<UserDto> userDtos, String s) {
-        if(userDtos!=null && userDtos.size()>0){
+        if (userDtos != null && userDtos.size() > 0) {
             for (UserDto userDto : userDtos) {
                 returnValue.getUsers().add(userDto.getPublicId());
             }
@@ -224,12 +232,12 @@ public class RoomController {
         returnValue.setMessage(s);
     }
 
-    @DeleteMapping(path="/{roomId}")
+    @DeleteMapping(path = "/{roomId}")
     public GeneralResponse deleteRoom(@PathVariable String roomId) {
-        log.info("deleteRoom roomId:"+roomId);
+        log.info("deleteRoom roomId:" + roomId);
 
-        if(!isAccessingMyRoomOrgAdmin(roomId)){
-            throw new AccessDeniedException("You are not allowed to delete this room id:"+roomId);
+        if (!isAccessingMyRoomOrgAdmin(roomId)) {
+            throw new AccessDeniedException("You are not allowed to delete this room id:" + roomId);
         }
 
         roomService.deleteRoom(roomId);
@@ -242,7 +250,7 @@ public class RoomController {
     }
 
 
-    private boolean isAccessingMyRoomOrgAdmin(String roomPublicId){
+    private boolean isAccessingMyRoomOrgAdmin(String roomPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         RoomDto roomDto = roomService.viewRoom(roomPublicId);
@@ -250,8 +258,8 @@ public class RoomController {
         OrganizationDto organizationDto = orgService.viewOrganization(roomDto.getOrganization());
 
         List<String> orgAdmins = organizationDto.getAdmins();
-        for(String admin: orgAdmins){
-            if(userDto.getPublicId().equals(admin)){
+        for (String admin : orgAdmins) {
+            if (userDto.getPublicId().equals(admin)) {
                 log.info("isAccessingMyRoomOrgAdmin=true");
                 return true;
             }
@@ -260,44 +268,44 @@ public class RoomController {
         return false;
     }
 
-    private boolean isOrgAdminAccessingRoom(String roomPublicId){
+    private boolean isOrgAdminAccessingRoom(String roomPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDto userDto = userService.findUserByEmail(auth.getName());
 
         List<String> roomsInMyOrganizations = new ArrayList<>();
         List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
-        if(isAdminOfOrganizations!=null){
+        if (isAdminOfOrganizations != null) {
             List<OrganizationDto> organizationDtos =
-            isAdminOfOrganizations.stream().map(e-> orgService.viewOrganization(e)).collect(Collectors.toList());
-            if(organizationDtos!=null){
-                organizationDtos.forEach(e->roomsInMyOrganizations.addAll(e.getRooms()));
+                    isAdminOfOrganizations.stream().map(e -> orgService.viewOrganization(e)).collect(Collectors.toList());
+            if (organizationDtos != null) {
+                organizationDtos.forEach(e -> roomsInMyOrganizations.addAll(e.getRooms()));
             }
         }
 
         return roomsInMyOrganizations.contains(roomPublicId);
     }
 
-    private boolean isAccessingMyOrg(String orgPublicId){
+    private boolean isAccessingMyOrg(String orgPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDto userDto = userService.findUserByEmail(auth.getName());
         List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
-        if(isAdminOfOrganizations!=null){
+        if (isAdminOfOrganizations != null) {
             return isAdminOfOrganizations.contains(orgPublicId);
         }
         return false;
     }
 
-    private boolean isRoomAdminAccessingRoom(String roomPublicId){
+    private boolean isRoomAdminAccessingRoom(String roomPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDto userDto = userService.findUserByEmail(auth.getName());
         List<String> isAdminOfRooms = userDto.getIsAdminOfRooms();
-        if(isAdminOfRooms!=null){
+        if (isAdminOfRooms != null) {
             return isAdminOfRooms.contains(roomPublicId);
         }
         return false;
     }
 
-    private boolean isUserAccessingRoom(String roomPublicId){
+    private boolean isUserAccessingRoom(String roomPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         return false;

@@ -210,6 +210,17 @@ public class MyModelMapper {
                 }
                 d.setBlockedTimeslots(blockedTimeslotDtos);
 
+                List<RoomImageEntity> roomImageEntities = s.getRoomImages();
+                List<RoomImageDto> roomImageDtos = new ArrayList<>();
+                if(roomImageEntities!=null){
+                    for(RoomImageEntity e: roomImageEntities){
+                        RoomImageDto dto = new RoomImageDto();
+                        dto.setImage(e.getImage());
+                        dto.setId(e.getPublicId());
+                    }
+                }
+                d.setRoomImages(roomImageDtos);
+
                 return d;
             }
         };

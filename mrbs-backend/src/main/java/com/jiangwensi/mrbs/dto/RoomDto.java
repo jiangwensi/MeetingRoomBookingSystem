@@ -16,7 +16,7 @@ public class RoomDto {
     private List<String> bookings = new ArrayList<>();
     private List<String> admins = new ArrayList<>();
     private String organization;
-    private RoomImageDto roomImage;
+    private List<RoomImageDto> roomImages;
     private List<String> users = new ArrayList<>();
     private List<BlockedTimeslotDto> blockedTimeslots = new ArrayList<>();
 
@@ -84,12 +84,12 @@ public class RoomDto {
         this.organization = organization;
     }
 
-    public RoomImageDto getRoomImage() {
-        return roomImage;
+    public List<RoomImageDto> getRoomImages() {
+        return roomImages;
     }
 
-    public void setRoomImage(RoomImageDto roomImage) {
-        this.roomImage = roomImage;
+    public void setRoomImages(List<RoomImageDto> roomImages) {
+        this.roomImages = roomImages;
     }
 
     public List<String> getAdmins() {
