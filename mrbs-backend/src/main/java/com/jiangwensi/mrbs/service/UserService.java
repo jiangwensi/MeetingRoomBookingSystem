@@ -39,4 +39,5 @@ public interface UserService extends UserDetailsService {
 
     UserDto updateMyProfile(String publicId, String name, String email, String changeEmailReturnUrl);
 
+    boolean isAccessingMyOrg(String orgPublicId);
 }

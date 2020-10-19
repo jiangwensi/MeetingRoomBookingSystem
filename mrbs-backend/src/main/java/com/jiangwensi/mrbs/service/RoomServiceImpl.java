@@ -5,9 +5,11 @@ import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.dto.RoomDto;
 import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.*;
+import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
 import com.jiangwensi.mrbs.model.request.room.BlockedTimeSlot;
+import com.jiangwensi.mrbs.model.request.room.RoomRequest;
 import com.jiangwensi.mrbs.repo.*;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
@@ -15,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +45,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Autowired
     private BlockTimeslotRepo blockTimeslotRepo;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private BookingRepository bookingRepo;
@@ -87,12 +94,21 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public RoomDto createRoom(String name, Integer capacity, String facilities, String description, Boolean active,
-                              String organization,
-                              List<String> admins, List<BlockedTimeSlot> blockedTimeslots, MultipartFile[] roomImages) throws IOException {
-        log.info("createRoom name:" + name + ",capacity:" + capacity + ",facilities:" + facilities + ",description:" + description +
-                ",active:" + active + ",admins:" + admins == null ? "" :
-                String.join(" ", admins) + ",roomImages.length=" + roomImages.length);
+    public RoomDto createRoom(RoomRequest request, MultipartFile[] roomImages) throws IOException {
+
+
+        String name = request.getName();
+        Integer capacity = request.getCapacity();
+        String facilities = request.getFacilities();
+        String description = request.getDescription();
+        String organization = request.getOrgPublicId();
+        Boolean active = request.isActive();
+        List<String> admins = request.getAdmins();
+        List<BlockedTimeSlot> blockedTimeslots = request.getBlockedTimeslots();
+
+        if (!userService.isAccessingMyOrg(organization)) {
+            throw new AccessDeniedException("You are not allowed to create room for this organization " + organization);
+        }
 
         if (roomRepo.findByRoomNameAndOrgPublicId(name, organization) != null) {
             throw new InvalidInputException("There is an existing room with the same name in this organization. " +
@@ -127,14 +143,16 @@ public class RoomServiceImpl implements RoomService {
             roomEntity.setOrganization(organizationEntity);
         }
 
-        List<RoomImageEntity> roomImageEntities = new ArrayList<RoomImageEntity>();
-        for(int i = 0; i < roomImages.length; i++){
-            RoomImageEntity e = new RoomImageEntity();
-            e.setImage(ArrayUtils.toObject(roomImages[i].getBytes()));
-            e.setRoom(roomEntity);
-            roomImageEntities.add(e);
+        if(roomImages!=null && roomImages.length>0) {
+            List<RoomImageEntity> roomImageEntities = new ArrayList<RoomImageEntity>();
+            for (int i = 0; i < roomImages.length; i++) {
+                RoomImageEntity e = new RoomImageEntity();
+                e.setImage(ArrayUtils.toObject(roomImages[i].getBytes()));
+                e.setRoom(roomEntity);
+                roomImageEntities.add(e);
+            }
+            roomEntity.setRoomImages(roomImageEntities);
         }
-        roomEntity.setRoomImages(roomImageEntities);
 
         List<BlockedTimeslotEntity> blockedTimeSlots = new ArrayList<>();
         if (blockedTimeslots != null && blockedTimeslots.size() > 0) {
@@ -154,6 +172,7 @@ public class RoomServiceImpl implements RoomService {
 
         return returnValue;
     }
+
 
     @Override
     @Transactional

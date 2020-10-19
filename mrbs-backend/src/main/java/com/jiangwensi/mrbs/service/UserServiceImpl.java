@@ -22,8 +22,10 @@ import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -408,6 +410,18 @@ public class UserServiceImpl implements UserService {
         }
         returnValue.setAuthorities(grantedAuthorities);
         return returnValue;
+    }
+
+
+    @Override
+    public boolean isAccessingMyOrg(String orgPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = findUserByEmail(auth.getName());
+        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
+        if (isAdminOfOrganizations != null) {
+            return isAdminOfOrganizations.contains(orgPublicId);
+        }
+        return false;
     }
 
 

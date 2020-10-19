@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 @RequestMapping(PathConst.ROOM_PATH)
 //@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @Scope("request")
-public class RoomController {
+public class RoomController extends BaseController {
     @Autowired
     RoomService roomService;
 
@@ -138,31 +138,13 @@ public class RoomController {
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public RoomResponse createRoom(@RequestPart(value = "roomImage", required = false) MultipartFile[] roomImages
-            , @RequestPart(value = "roomData") RoomRequest request
+    public GeneralResponse createRoom(
+            @RequestPart(value = "roomImage", required = false) MultipartFile[] roomImages,
+            @RequestPart(value = "roomData") RoomRequest request
     ) throws IOException {
         log.info("createRoom " + request.toString());
-        String name = request.getName();
-        Integer capacity = request.getCapacity();
-        String facilities = request.getFacilities();
-        String description = request.getDescription();
-        String organization = request.getOrgPublicId();
-        Boolean active = request.isActive();
-        List<String> admins = request.getAdmins();
-        List<BlockedTimeSlot> blockedTimeslots = request.getBlockedTimeslots();
-
-        if (!isAccessingMyOrg(organization)) {
-            throw new AccessDeniedException("You are not allowed to create room for this organization " + organization);
-        }
-
-        RoomDto roomDto = roomService.createRoom(name, capacity, facilities, description, active, organization, admins,
-                blockedTimeslots, roomImages);
-        RoomResponse returnValue = new RoomResponse();
-//        new ModelMapper().map(roomDto, returnValue);
-
-        returnValue.setStatus(MyResponseStatus.success.name());
-        returnValue.setMessage("Create room is successful");
-        return returnValue;
+        roomService.createRoom(request, roomImages);
+        return generalSuccessResponse("Create room is successful");
     }
 
     @PatchMapping
@@ -285,16 +267,6 @@ public class RoomController {
         return roomsInMyOrganizations.contains(roomPublicId);
     }
 
-    private boolean isAccessingMyOrg(String orgPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
-        if (isAdminOfOrganizations != null) {
-            return isAdminOfOrganizations.contains(orgPublicId);
-        }
-        return false;
-    }
-
     private boolean isRoomAdminAccessingRoom(String roomPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDto userDto = userService.findUserByEmail(auth.getName());
@@ -311,35 +283,4 @@ public class RoomController {
         return false;
     }
 
-//    private boolean isCreatingMyRoomOrgAdmin(String organization){
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        UserDto userDto = userService.findUserByEmail(auth.getName());
-//        OrganizationDto organizationDto = orgService.viewOrganization(organization);
-//        List<String> orgAdmins = organizationDto.getAdmins();
-//        for(String admin: orgAdmins){
-//            if(userDto.getPublicId().equals(admin)){
-//                log.info("isCreatingMyRoomOrgAdmin=true");
-//                return true;
-//            }
-//        }
-//        log.info("isCreatingMyRoomOrgAdmin=false");
-//        return false;
-//    }
-//
-//    private boolean isAccessingMyRoomRoomAdmin(String roomPublicId){
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//
-//        UserDto userDto = userService.findUserByEmail(auth.getName());
-//
-//        RoomDto roomDto = roomService.viewRoom(roomPublicId);
-//        List<String> roomAdmins = roomDto.getAdmins();
-//        for(String admin: roomAdmins){
-//            if(userDto.getPublicId().equals(admin)){
-//                log.info("isAccessingMyRoomRoomAdmin=true");
-//                return true;
-//            }
-//        }
-//        log.info("isAccessingMyRoomRoomAdmin=false");
-//        return false;
-//    }
 }
