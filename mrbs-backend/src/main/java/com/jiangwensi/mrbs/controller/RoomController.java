@@ -27,7 +27,6 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -137,9 +136,9 @@ public class RoomController extends BaseController {
         return returnValue;
     }
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping
     public GeneralResponse createRoom(
-            @RequestPart(value = "roomImage", required = false) MultipartFile[] roomImages,
+            @RequestPart(value = "roomImages", required = false) MultipartFile[] roomImages,
             @RequestPart(value = "roomData") RoomRequest request
     ) throws IOException {
         log.info("createRoom " + request.toString());
