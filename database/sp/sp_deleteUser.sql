@@ -1,12 +1,6 @@
-SELECT * FROM user;
-select * from user_role;
-select * from token;
-delete from user_role where role_id = 1 and user_id = 32;
-
-
-drop procedure if exists delete_user;
+drop procedure if exists deleteUser;
 delimiter $$
-create procedure delete_user(in theEmail text)
+create procedure deleteUser(in theEmail text)
 begin
 	declare userId int default -1;
 	select id from user where email = theEmail into userId;
