@@ -19,7 +19,7 @@ public class RoomImageEntity {
     private RoomEntity room;
 
     @Lob
-    private Byte[] image;
+    private byte[] image;
 
     @Column(nullable = false)
     private String publicId;
@@ -51,11 +51,11 @@ public class RoomImageEntity {
         this.room = room;
     }
 
-    public Byte[] getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(Byte[] image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 }

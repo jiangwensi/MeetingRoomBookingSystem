@@ -20,6 +20,7 @@ public interface RoomRepository extends CrudRepository<RoomEntity,Long> {
     List<RoomEntity> searchRoom(@Param("name") String name,
                                 @Param("orgName") String orgName, @Param("active") Boolean active);
 
+    
     RoomEntity findByPublicId(String publicId);
 
     @Query(nativeQuery = true,

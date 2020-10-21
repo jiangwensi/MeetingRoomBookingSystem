@@ -20,6 +20,7 @@ public class RoomResponse extends GeneralResponse {
     private List<String> bookings = new ArrayList<>();
     private List<String> admins = new ArrayList<>();
     private List<String> users = new ArrayList<>();
+    private List<String> images = new ArrayList<>();
     private List<BlockedTimeSlot> blockedTimeslots = new ArrayList<>();
     private String organization;
 
@@ -109,5 +110,13 @@ public class RoomResponse extends GeneralResponse {
 
     public void setBlockedTimeslots(List<BlockedTimeSlot> blockedTimeslots) {
         this.blockedTimeslots = blockedTimeslots;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 }

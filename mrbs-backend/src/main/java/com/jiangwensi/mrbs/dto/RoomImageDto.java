@@ -6,7 +6,7 @@ package com.jiangwensi.mrbs.dto;
 public class RoomImageDto {
     private String id;
 //    private RoomDto room;
-    private Byte[] image;
+    private String image;
 
     public String getId() {
         return id;
@@ -24,11 +24,11 @@ public class RoomImageDto {
 //        this.room = room;
 //    }
 
-    public Byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(Byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 }

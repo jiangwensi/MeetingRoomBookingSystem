@@ -11,9 +11,7 @@ import com.jiangwensi.mrbs.repo.*;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,26 +30,29 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RoomServiceImpl implements RoomService {
 
-    @Autowired
     private RoomRepository roomRepo;
 
-    @Autowired
     private UserRepository userRepo;
 
-    @Autowired
     private OrgRepository orgRepo;
 
-    @Autowired
     private BlockTimeslotRepo blockTimeslotRepo;
 
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private BookingRepository bookingRepo;
 
-    @Autowired
     OrgService orgService;
+
+    public RoomServiceImpl(RoomRepository roomRepo, UserRepository userRepo, OrgRepository orgRepo, BlockTimeslotRepo blockTimeslotRepo, UserService userService, BookingRepository bookingRepo, OrgService orgService) {
+        this.roomRepo = roomRepo;
+        this.userRepo = userRepo;
+        this.orgRepo = orgRepo;
+        this.blockTimeslotRepo = blockTimeslotRepo;
+        this.userService = userService;
+        this.bookingRepo = bookingRepo;
+        this.orgService = orgService;
+    }
 
     @Override
     public List<RoomDto> searchRoom(String name, String orgName, Boolean active) {
@@ -71,13 +72,13 @@ public class RoomServiceImpl implements RoomService {
                 .stream()
                 .filter(e ->
                         isOrgAdminAccessingRoom(e.getPublicId()) ||
-                        isRoomAdminAccessingRoom(e.getPublicId()) ||
-                        isUserAccessingRoom(e.getPublicId()))
+                                isRoomAdminAccessingRoom(e.getPublicId()) ||
+                                isUserAccessingRoom(e.getPublicId()))
                 .forEach(e -> {
                     RoomDto roomDto = new RoomDto();
                     mm.map(e, roomDto);
                     returnValue.add(roomDto);
-        });
+                });
 
         return returnValue;
     }
@@ -86,6 +87,9 @@ public class RoomServiceImpl implements RoomService {
     public RoomDto viewRoom(String publicId) {
         log.info("viewRoom publicId:" + publicId);
 
+        if (!isOrgAdminAccessingRoom(publicId) && !isRoomAdminAccessingRoom(publicId) && !isUserAccessingRoom(publicId)) {
+            throw new AccessDeniedException("You are not allowed to view room " + publicId);
+        }
         RoomDto returnValue = new RoomDto();
         RoomEntity roomEntity = roomRepo.findByPublicId(publicId);
 
@@ -95,7 +99,6 @@ public class RoomServiceImpl implements RoomService {
 
         ModelMapper mm = MyModelMapper.roomEntityToDtoModelMapper();
         mm.map(roomEntity, returnValue);
-
         return returnValue;
     }
 
@@ -154,7 +157,7 @@ public class RoomServiceImpl implements RoomService {
             List<RoomImageEntity> roomImageEntities = new ArrayList<RoomImageEntity>();
             for (int i = 0; i < roomImages.length; i++) {
                 RoomImageEntity e = new RoomImageEntity();
-                e.setImage(ArrayUtils.toObject(roomImages[i].getBytes()));
+                e.setImage(roomImages[i].getBytes());
                 e.setRoom(roomEntity);
                 roomImageEntities.add(e);
             }

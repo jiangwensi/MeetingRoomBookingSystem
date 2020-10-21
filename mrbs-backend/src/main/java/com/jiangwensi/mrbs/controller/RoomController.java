@@ -24,11 +24,11 @@ import com.jiangwensi.mrbs.model.response.user.UserResponse;
 import com.jiangwensi.mrbs.service.OrgService;
 import com.jiangwensi.mrbs.service.RoomService;
 import com.jiangwensi.mrbs.service.UserService;
+import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,14 +46,16 @@ import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @Scope("request")
 public class RoomController extends BaseController {
-    @Autowired
+
     RoomService roomService;
-
-    @Autowired
     UserService userService;
-
-    @Autowired
     OrgService orgService;
+
+    public RoomController(RoomService roomService, UserService userService, OrgService orgService) {
+        this.roomService = roomService;
+        this.userService = userService;
+        this.orgService = orgService;
+    }
 
     @GetMapping
     public SearchRoomResponse search(@RequestParam(required = false, value = "roomName") String name,
@@ -78,16 +80,14 @@ public class RoomController extends BaseController {
     @GetMapping("/{publicId}")
     public RoomResponse viewRoom(@PathVariable String publicId) {
         log.info("viewRoom publicId:" + publicId);
-        if (!roomService.isOrgAdminAccessingRoom(publicId) && !roomService.isRoomAdminAccessingRoom(publicId) && !roomService.isUserAccessingRoom(publicId)) {
-            throw new AccessDeniedException("You are not allowed to view room " + publicId);
-        }
         RoomDto roomDto = roomService.viewRoom(publicId);
         RoomResponse returnValue = new RoomResponse();
-        new ModelMapper().map(roomDto, returnValue);
+        ModelMapper mm = MyModelMapper.roomDtoToRoomResponseMapper();
+        mm.map(roomDto, returnValue);
 
         returnValue.setStatus(MyResponseStatus.success.name());
         returnValue.setMessage("View room is successful");
-
+        System.out.println(returnValue.getImages().get(0));
         return returnValue;
     }
 

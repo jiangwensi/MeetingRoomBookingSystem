@@ -4,6 +4,7 @@ import com.jiangwensi.mrbs.dto.*;
 import com.jiangwensi.mrbs.entity.*;
 import com.jiangwensi.mrbs.model.response.organization.OrganizationResponse;
 import com.jiangwensi.mrbs.model.response.organization.SearchOrganizationResponseItem;
+import com.jiangwensi.mrbs.model.response.room.RoomResponse;
 import com.jiangwensi.mrbs.model.response.user.UserResponse;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -11,6 +12,7 @@ import org.modelmapper.spi.MappingContext;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -215,8 +217,11 @@ public class MyModelMapper {
                 if(roomImageEntities!=null){
                     for(RoomImageEntity e: roomImageEntities){
                         RoomImageDto dto = new RoomImageDto();
-                        dto.setImage(e.getImage());
+                        System.out.println(e.getImage());
+                        System.out.println(Base64.getEncoder().encodeToString(e.getImage()));
+                        dto.setImage(Base64.getEncoder().encodeToString(e.getImage()));
                         dto.setId(e.getPublicId());
+                        roomImageDtos.add(dto);
                     }
                 }
                 d.setRoomImages(roomImageDtos);
@@ -249,6 +254,30 @@ public class MyModelMapper {
         return mm;
     }
 
+    public static ModelMapper roomDtoToRoomResponseMapper() {
+        Converter<RoomDto, RoomResponse> converter = new Converter<RoomDto,RoomResponse>() {
+            @Override
+            public RoomResponse convert(MappingContext<RoomDto, RoomResponse> contex) {
+                RoomDto s = contex.getSource();
+                RoomResponse d = contex.getDestination();
+                d.setOrganization(s.getOrganization());
+                d.setFacilities(s.getFacilities());
+                d.setCapacity(s.getCapacity());
+                d.setBookings(s.getBookings());
+                d.setActive(s.isActive());
+                d.setAdmins(s.getAdmins());
+                d.setDescription(s.getDescription());
+                d.setImages(s.getRoomImages().stream().map(e->e.getImage()).collect(Collectors.toList()));
+                d.setName(s.getName());
+                d.setPublicId(s.getPublicId());
+                d.setUsers(s.getUsers());
+                return d;
+            }
+        };
+        ModelMapper mm = new ModelMapper();
+        mm.addConverter(converter);
+        return mm;
+    }
 }
 
 
