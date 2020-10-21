@@ -2,7 +2,10 @@ package com.jiangwensi.mrbs.controller;
 
 import com.jiangwensi.mrbs.constant.MyResponseStatus;
 import com.jiangwensi.mrbs.constant.PathConst;
-import com.jiangwensi.mrbs.dto.*;
+import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
+import com.jiangwensi.mrbs.dto.BookingDto;
+import com.jiangwensi.mrbs.dto.RoomDto;
+import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.model.request.RoomUserRequest;
@@ -27,15 +30,12 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jiang Wensi on 25/8/2020
@@ -63,8 +63,6 @@ public class RoomController extends BaseController {
 
         List<RoomDto> roomDtos = roomService.searchRoom(name, orgName, active);
 
-        roomDtos.stream().filter(e -> isOrgAdminAccessingRoom(e.getPublicId()) || isRoomAdminAccessingRoom(e.getPublicId()) || isUserAccessingRoom(e.getPublicId()));
-
         List<SearchRoomResponseItem> items = new ModelMapper().map(roomDtos,
                 new TypeToken<List<SearchRoomResponseItem>>() {
                 }.getType());
@@ -80,7 +78,7 @@ public class RoomController extends BaseController {
     @GetMapping("/{publicId}")
     public RoomResponse viewRoom(@PathVariable String publicId) {
         log.info("viewRoom publicId:" + publicId);
-        if (!isOrgAdminAccessingRoom(publicId) && !isRoomAdminAccessingRoom(publicId) && !isUserAccessingRoom(publicId)) {
+        if (!roomService.isOrgAdminAccessingRoom(publicId) && !roomService.isRoomAdminAccessingRoom(publicId) && !roomService.isUserAccessingRoom(publicId)) {
             throw new AccessDeniedException("You are not allowed to view room " + publicId);
         }
         RoomDto roomDto = roomService.viewRoom(publicId);
@@ -150,7 +148,7 @@ public class RoomController extends BaseController {
     public RoomResponse updateRoom(@RequestBody RoomRequest request) {
         log.info("updateRoom " + request.toString());
         String publicId = request.getPublicId();
-        if (!isAccessingMyRoomOrgAdmin(publicId)) {
+        if (!roomService.isAccessingMyRoomOrgAdmin(publicId)) {
             throw new AccessDeniedException("You are not allowed to edit this room");
         }
         String name = request.getName();
@@ -178,7 +176,7 @@ public class RoomController extends BaseController {
     public RoomUserResponse enrollUser(@PathVariable String roomId, @RequestBody RoomUserRequest request) {
         log.info("enrollUser roomId:" + roomId + "," + request.toString());
 
-        if (!isOrgAdminAccessingRoom(roomId) && !isRoomAdminAccessingRoom(roomId)) {
+        if (!roomService.isOrgAdminAccessingRoom(roomId) && !roomService.isRoomAdminAccessingRoom(roomId)) {
             throw new AccessDeniedException("You are not allowed to enroll user for this room");
         }
 
@@ -217,7 +215,7 @@ public class RoomController extends BaseController {
     public GeneralResponse deleteRoom(@PathVariable String roomId) {
         log.info("deleteRoom roomId:" + roomId);
 
-        if (!isAccessingMyRoomOrgAdmin(roomId)) {
+        if (!roomService.isAccessingMyRoomOrgAdmin(roomId)) {
             throw new AccessDeniedException("You are not allowed to delete this room id:" + roomId);
         }
 
@@ -230,56 +228,5 @@ public class RoomController extends BaseController {
         return returnValue;
     }
 
-
-    private boolean isAccessingMyRoomOrgAdmin(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        RoomDto roomDto = roomService.viewRoom(roomPublicId);
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-        OrganizationDto organizationDto = orgService.viewOrganization(roomDto.getOrganization());
-
-        List<String> orgAdmins = organizationDto.getAdmins();
-        for (String admin : orgAdmins) {
-            if (userDto.getPublicId().equals(admin)) {
-                log.info("isAccessingMyRoomOrgAdmin=true");
-                return true;
-            }
-        }
-        log.info("isAccessingMyRoomOrgAdmin=false");
-        return false;
-    }
-
-    private boolean isOrgAdminAccessingRoom(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-
-        List<String> roomsInMyOrganizations = new ArrayList<>();
-        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
-        if (isAdminOfOrganizations != null) {
-            List<OrganizationDto> organizationDtos =
-                    isAdminOfOrganizations.stream().map(e -> orgService.viewOrganization(e)).collect(Collectors.toList());
-            if (organizationDtos != null) {
-                organizationDtos.forEach(e -> roomsInMyOrganizations.addAll(e.getRooms()));
-            }
-        }
-
-        return roomsInMyOrganizations.contains(roomPublicId);
-    }
-
-    private boolean isRoomAdminAccessingRoom(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-        List<String> isAdminOfRooms = userDto.getIsAdminOfRooms();
-        if (isAdminOfRooms != null) {
-            return isAdminOfRooms.contains(roomPublicId);
-        }
-        return false;
-    }
-
-    private boolean isUserAccessingRoom(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        return false;
-    }
 
 }

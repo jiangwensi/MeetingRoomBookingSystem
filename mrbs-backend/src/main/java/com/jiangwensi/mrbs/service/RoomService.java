@@ -48,4 +48,14 @@ public interface RoomService {
     List<BookingDto> listRoomBookings(String roomPublicId);
 
     List<AvailableTimeslotDto> listAvailableTimeslots(String roomPublicId, String date);
+
+    boolean isAccessingMyOrg(String orgPublicId);
+
+    boolean isAccessingMyRoomOrgAdmin(String roomPublicId);
+
+    boolean isOrgAdminAccessingRoom(String roomPublicId);
+
+    boolean isRoomAdminAccessingRoom(String roomPublicId);
+
+    boolean isUserAccessingRoom(String roomPublicId);
 }

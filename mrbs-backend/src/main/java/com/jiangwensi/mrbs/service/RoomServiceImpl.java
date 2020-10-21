@@ -1,9 +1,6 @@
 package com.jiangwensi.mrbs.service;
 
-import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
-import com.jiangwensi.mrbs.dto.BookingDto;
-import com.jiangwensi.mrbs.dto.RoomDto;
-import com.jiangwensi.mrbs.dto.UserDto;
+import com.jiangwensi.mrbs.dto.*;
 import com.jiangwensi.mrbs.entity.*;
 import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
@@ -26,6 +23,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Jiang Wensi on 25/8/2020
@@ -52,6 +50,9 @@ public class RoomServiceImpl implements RoomService {
     @Autowired
     private BookingRepository bookingRepo;
 
+    @Autowired
+    OrgService orgService;
+
     @Override
     public List<RoomDto> searchRoom(String name, String orgName, Boolean active) {
         log.info("searchRoom name:" + name + ",active:" + active);
@@ -66,10 +67,16 @@ public class RoomServiceImpl implements RoomService {
 
         ModelMapper mm = MyModelMapper.roomEntityToDtoModelMapper();
 
-        roomEntities.forEach(e -> {
-            RoomDto roomDto = new RoomDto();
-            mm.map(e, roomDto);
-            returnValue.add(roomDto);
+        roomEntities
+                .stream()
+                .filter(e ->
+                        isOrgAdminAccessingRoom(e.getPublicId()) ||
+                        isRoomAdminAccessingRoom(e.getPublicId()) ||
+                        isUserAccessingRoom(e.getPublicId()))
+                .forEach(e -> {
+                    RoomDto roomDto = new RoomDto();
+                    mm.map(e, roomDto);
+                    returnValue.add(roomDto);
         });
 
         return returnValue;
@@ -143,7 +150,7 @@ public class RoomServiceImpl implements RoomService {
             roomEntity.setOrganization(organizationEntity);
         }
 
-        if(roomImages!=null && roomImages.length>0) {
+        if (roomImages != null && roomImages.length > 0) {
             List<RoomImageEntity> roomImageEntities = new ArrayList<RoomImageEntity>();
             for (int i = 0; i < roomImages.length; i++) {
                 RoomImageEntity e = new RoomImageEntity();
@@ -430,6 +437,74 @@ public class RoomServiceImpl implements RoomService {
         //TODO
         //Apply procedure here
         return null;
+    }
+
+
+    @Override
+    public boolean isAccessingMyOrg(String orgPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = userService.findUserByEmail(auth.getName());
+        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
+        if (isAdminOfOrganizations != null) {
+            return isAdminOfOrganizations.contains(orgPublicId);
+        }
+        return false;
+    }
+
+
+    @Override
+    public boolean isAccessingMyRoomOrgAdmin(String roomPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        RoomDto roomDto = viewRoom(roomPublicId);
+        UserDto userDto = userService.findUserByEmail(auth.getName());
+        OrganizationDto organizationDto = orgService.viewOrganization(roomDto.getOrganization());
+
+        List<String> orgAdmins = organizationDto.getAdmins();
+        for (String admin : orgAdmins) {
+            if (userDto.getPublicId().equals(admin)) {
+                log.info("isAccessingMyRoomOrgAdmin=true");
+                return true;
+            }
+        }
+        log.info("isAccessingMyRoomOrgAdmin=false");
+        return false;
+    }
+
+    @Override
+    public boolean isOrgAdminAccessingRoom(String roomPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = userService.findUserByEmail(auth.getName());
+
+        List<String> roomsInMyOrganizations = new ArrayList<>();
+        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
+        if (isAdminOfOrganizations != null) {
+            List<OrganizationDto> organizationDtos =
+                    isAdminOfOrganizations.stream().map(e -> orgService.viewOrganization(e)).collect(Collectors.toList());
+            if (organizationDtos != null) {
+                organizationDtos.forEach(e -> roomsInMyOrganizations.addAll(e.getRooms()));
+            }
+        }
+
+        return roomsInMyOrganizations.contains(roomPublicId);
+    }
+
+    @Override
+    public boolean isRoomAdminAccessingRoom(String roomPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = userService.findUserByEmail(auth.getName());
+        List<String> isAdminOfRooms = userDto.getIsAdminOfRooms();
+        if (isAdminOfRooms != null) {
+            return isAdminOfRooms.contains(roomPublicId);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isUserAccessingRoom(String roomPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        return false;
     }
 }
 
