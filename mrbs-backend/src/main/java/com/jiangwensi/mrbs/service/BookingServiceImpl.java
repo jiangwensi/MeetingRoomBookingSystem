@@ -1,6 +1,7 @@
 package com.jiangwensi.mrbs.service;
 
 import com.jiangwensi.mrbs.AppProperties;
+import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.entity.BookingEntity;
 import com.jiangwensi.mrbs.entity.RoomEntity;
@@ -185,6 +186,12 @@ public class BookingServiceImpl implements BookingService {
             returnValue.add(bookingDto);
         }
         return returnValue;
+    }
+
+    @Override
+    public List<AvailableTimeslotDto> fetchAvailableslotByRoom(String roomId, String date) {
+
+        return null;
     }
 
     public Boolean clash(String roomId, String from, String to) {

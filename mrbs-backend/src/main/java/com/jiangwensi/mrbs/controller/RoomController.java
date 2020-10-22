@@ -139,7 +139,9 @@ public class RoomController extends BaseController {
             @RequestPart(value = "roomImages", required = false) MultipartFile[] roomImages,
             @RequestPart(value = "roomData") RoomRequest request
     ) throws IOException {
-        log.info("createRoom " + request.toString());
+        log.info("createRoom " + request.toString()
+
+        );
         roomService.createRoom(request, roomImages);
         return generalSuccessResponse("Create room is successful");
     }

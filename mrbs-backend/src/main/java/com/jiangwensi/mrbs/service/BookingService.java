@@ -1,5 +1,6 @@
 package com.jiangwensi.mrbs.service;
 
+import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
 
 import java.text.ParseException;
@@ -22,4 +23,6 @@ public interface BookingService {
     void deleteBooking(String publicId);
 
     List<BookingDto> search(Boolean isSysAdm, String bookedBy, String roomId, String fromDate,String toDate);
+
+    List<AvailableTimeslotDto> fetchAvailableslotByRoom(String roomId, String date);
 }

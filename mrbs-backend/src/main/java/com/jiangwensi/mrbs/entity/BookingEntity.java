@@ -17,6 +17,9 @@ public class BookingEntity {
     private String publicId;
 
     @Column(nullable = false)
+    private Date date;
+
+    @Column(nullable = false)
     private Date fromTime;
 
     @Column(nullable = false)
@@ -75,5 +78,13 @@ public class BookingEntity {
 
     public void setBookedBy(UserEntity bookedBy) {
         this.bookedBy = bookedBy;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

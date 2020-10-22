@@ -2,6 +2,7 @@ package com.jiangwensi.mrbs.controller;
 
 import com.jiangwensi.mrbs.constant.MyResponseStatus;
 import com.jiangwensi.mrbs.constant.PathConst;
+import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.dto.RoomDto;
 import com.jiangwensi.mrbs.dto.UserDto;
@@ -11,13 +12,14 @@ import com.jiangwensi.mrbs.model.response.GeneralResponse;
 import com.jiangwensi.mrbs.model.response.booking.BookingResponse;
 import com.jiangwensi.mrbs.model.response.booking.SearchBookingResponse;
 import com.jiangwensi.mrbs.model.response.booking.SearchBookingResponseItem;
+import com.jiangwensi.mrbs.model.response.room.AvailableTimeslot;
+import com.jiangwensi.mrbs.model.response.room.AvailableTimeslotResponse;
 import com.jiangwensi.mrbs.service.BookingService;
 import com.jiangwensi.mrbs.service.RoomService;
 import com.jiangwensi.mrbs.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -38,15 +40,31 @@ import java.util.List;
 @Scope("request")
 public class BookingController {
 
-    @Autowired
     private BookingService bookingService;
-
-    @Autowired
     private UserService userService;
-    @Autowired
     private RoomService roomService;
 
-//    @GetMapping("/sysadm")
+    public BookingController(BookingService bookingService, UserService userService, RoomService roomService) {
+        this.bookingService = bookingService;
+        this.userService = userService;
+        this.roomService = roomService;
+    }
+
+    @GetMapping("/room/${roomId}/availableslots/${date}")
+    public AvailableTimeslotResponse fetchAvailableslotByRoom(
+            @PathVariable("roomId") String roomId,
+            @PathVariable("date") String date) {
+        List<AvailableTimeslotDto> dtos = bookingService.fetchAvailableslotByRoom(roomId,date);
+        List<AvailableTimeslot> responseItem = new ModelMapper().map(dtos, new TypeToken<ArrayList<AvailableTimeslot>>(){}.getType());
+
+        AvailableTimeslotResponse response = new AvailableTimeslotResponse();
+        response.setAvailableTimeslots(responseItem);
+        response.setStatus(MyResponseStatus.success.name());
+        return response;
+    }
+
+
+    //    @GetMapping("/sysadm")
 //    @PreAuthorize("hasAuthority('SYSADM')")
 //    public SearchBookingResponse searchBookingBySysAdm(@RequestParam(required = false) String bookedBy,
 //                                                       @RequestParam(required = false) String roomId,
@@ -65,14 +83,14 @@ public class BookingController {
 
     @GetMapping
     public SearchBookingResponse searchBooking(@RequestParam(required = false) String roomName,
-                                                 @RequestParam(required = false) String fromDate,
-                                                 @RequestParam(required = false) String toDate) {
+                                               @RequestParam(required = false) String fromDate,
+                                               @RequestParam(required = false) String toDate) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDto userDto = userService.findUserByEmail(auth.getName());
         boolean isSysAdm =
                 auth.getAuthorities().contains(new SimpleGrantedAuthority("SYSADM"));
-        List<BookingDto> bookingDtos = bookingService.search(isSysAdm,userDto.getPublicId(), roomName, fromDate,toDate);
+        List<BookingDto> bookingDtos = bookingService.search(isSysAdm, userDto.getPublicId(), roomName, fromDate, toDate);
         SearchBookingResponse returnValue = new SearchBookingResponse();
         List<SearchBookingResponseItem> bookings = new ModelMapper().map(bookingDtos, new TypeToken<ArrayList<SearchBookingResponseItem>>() {
         }.getType());
@@ -88,7 +106,7 @@ public class BookingController {
 
         UserDto userDto = getMyDto();
 
-        if (!isAccessedByRoomUser(request.getRoomId())&&!isAccessedByTargetRole("SYSADM")) {
+        if (!isAccessedByRoomUser(request.getRoomId()) && !isAccessedByTargetRole("SYSADM")) {
             throw new AccessDeniedException("You are not allowed to book this room:" + request.getRoomId());
         }
 
@@ -129,7 +147,7 @@ public class BookingController {
 
 
         if (!isAccessingMyBooking(publicId)
-                && !isAccessedByRoomAdmin( publicId)
+                && !isAccessedByRoomAdmin(publicId)
         ) {
 
             throw new AccessDeniedException("You are not allowed to view this booking:" + publicId);
