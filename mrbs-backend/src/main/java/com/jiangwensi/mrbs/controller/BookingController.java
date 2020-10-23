@@ -50,10 +50,10 @@ public class BookingController {
         this.roomService = roomService;
     }
 
-    @GetMapping("/room/${roomId}/availableslots/${date}")
+    @GetMapping("/room/{roomId}/availableslots/{date}")
     public AvailableTimeslotResponse fetchAvailableslotByRoom(
             @PathVariable("roomId") String roomId,
-            @PathVariable("date") String date) {
+            @PathVariable(value="date",required = false)  String date) {
         List<AvailableTimeslotDto> dtos = bookingService.fetchAvailableslotByRoom(roomId,date);
         List<AvailableTimeslot> responseItem = new ModelMapper().map(dtos, new TypeToken<ArrayList<AvailableTimeslot>>(){}.getType());
 
@@ -62,6 +62,15 @@ public class BookingController {
         response.setStatus(MyResponseStatus.success.name());
         return response;
     }
+//
+//    @GetMapping("/{publicId}/availableTimeslots/{date}")
+//    public AvailableTimeslotResponse listAvailableTimeslots(@PathVariable("publicId") String roomPublicId,
+//                                                            @PathVariable String date) {
+//        List<AvailableTimeslotDto> availableTimeslotDtos = roomService.listAvailableTimeslots(roomPublicId, date);
+//
+//        AvailableTimeslotResponse returnValue = new AvailableTimeslotResponse();
+//        return returnValue;
+//    }
 
 
     //    @GetMapping("/sysadm")

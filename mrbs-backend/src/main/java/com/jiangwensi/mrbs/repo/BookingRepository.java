@@ -1,6 +1,7 @@
 package com.jiangwensi.mrbs.repo;
 
 import com.jiangwensi.mrbs.entity.BookingEntity;
+import com.jiangwensi.mrbs.entity.Slot;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -38,7 +39,11 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
                     "to_time>=:fromDate))")
     List<BookingEntity> searchBySysAdm(String roomName, String fromDate, String toDate);
 
-//    @Query(nativeQuery = true,
+    @Query(nativeQuery = true, value = "call getAvailableTimeslot(:roomId,:date)")
+    List<Slot> getAvailableSlots(@Param("roomId") String roomId, @Param("date") String date);
+
+
+    //    @Query(nativeQuery = true,
 //            value = "select b.* from booking b " +
 //                    "join room r on b.room_id = r.id " +
 //                    "where r.public_id=:roomId " +
@@ -88,4 +93,5 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
 //                    "where r.public_id=:roomId " +
 //                    "and b.booked_by = :bookedBy ")
 //    List<BookingEntity> searchByBookedByAndRoomId(@Param("bookedBy") String bookedBy, @Param("roomId") String roomId);
+
 }

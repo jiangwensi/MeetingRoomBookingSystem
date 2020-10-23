@@ -5,6 +5,7 @@ import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.entity.BookingEntity;
 import com.jiangwensi.mrbs.entity.RoomEntity;
+import com.jiangwensi.mrbs.entity.Slot;
 import com.jiangwensi.mrbs.entity.UserEntity;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
@@ -14,12 +15,15 @@ import com.jiangwensi.mrbs.repo.UserRepository;
 import com.jiangwensi.mrbs.utils.MyDateUtils;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -190,8 +194,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<AvailableTimeslotDto> fetchAvailableslotByRoom(String roomId, String date) {
-
-        return null;
+        if(date==null){
+            date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        }
+        List<Slot> slots = bookingRepo.getAvailableSlots(roomId,date);
+        List<AvailableTimeslotDto> returnResult = new ModelMapper().map(slots,
+                new TypeToken<ArrayList<Slot>>(){}.getType());
+        return returnResult;
     }
 
     public Boolean clash(String roomId, String from, String to) {

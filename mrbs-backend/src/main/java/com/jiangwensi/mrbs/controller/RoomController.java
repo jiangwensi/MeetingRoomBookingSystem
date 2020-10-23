@@ -2,7 +2,6 @@ package com.jiangwensi.mrbs.controller;
 
 import com.jiangwensi.mrbs.constant.MyResponseStatus;
 import com.jiangwensi.mrbs.constant.PathConst;
-import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.dto.RoomDto;
 import com.jiangwensi.mrbs.dto.UserDto;
@@ -15,7 +14,6 @@ import com.jiangwensi.mrbs.model.response.GeneralResponse;
 import com.jiangwensi.mrbs.model.response.RoomUserResponse;
 import com.jiangwensi.mrbs.model.response.booking.SearchBookingResponse;
 import com.jiangwensi.mrbs.model.response.booking.SearchBookingResponseItem;
-import com.jiangwensi.mrbs.model.response.room.AvailableTimeslotResponse;
 import com.jiangwensi.mrbs.model.response.room.RoomResponse;
 import com.jiangwensi.mrbs.model.response.room.SearchRoomResponse;
 import com.jiangwensi.mrbs.model.response.room.SearchRoomResponseItem;
@@ -88,15 +86,6 @@ public class RoomController extends BaseController {
         returnValue.setStatus(MyResponseStatus.success.name());
         returnValue.setMessage("View room is successful");
         System.out.println(returnValue.getImages().get(0));
-        return returnValue;
-    }
-
-    @GetMapping("/{publicId}/availableTimeslots/{date}")
-    public AvailableTimeslotResponse listAvailableTimeslots(@PathVariable("publicId") String roomPublicId,
-                                                            @PathVariable String date) {
-        List<AvailableTimeslotDto> availableTimeslotDtos = roomService.listAvailableTimeslots(roomPublicId, date);
-
-        AvailableTimeslotResponse returnValue = new AvailableTimeslotResponse();
         return returnValue;
     }
 

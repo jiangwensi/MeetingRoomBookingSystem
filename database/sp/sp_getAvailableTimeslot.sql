@@ -1,29 +1,41 @@
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getAvailableTimeslot`(in theRoomPublicId text, in theDate date)
-begin 
-	declare roomId int default -1;
-    declare theFrom time default time(date(now()));
-    declare theTo time default theFrom + interval 1 hour;
-    
-	drop table if exists slots;
-    create temporary table slots(`from` datetime, `to` datetime);
-    while theFrom < time(date(now())) + interval 24 hour do
-		insert into slots (`from`,`to`) 
-        values(timestamp(theDate, theFrom),
-        timestamp(theDate, theTo));
-        set theFrom := theFrom + interval 1 hour;
-        set theTo := theFrom + interval 1 hour;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createBookingTestData`(in dataSize int)
+begin
+	declare count int default 0;
+    declare userSize int default 0;
+    declare randUserId int default -1;
+    declare userId int default -1;
+    declare roomSize int default 0;
+    declare roomId int default -1;
+    declare randRoomId int default -1;
+    declare bookedBy int default -1;
+    declare theDate date;
+    declare theFrom datetime;
+    declare theTo datetime;
+    select count(*) from room where active = true into roomSize;
+    while count < dataSize do
+		# set room_id
+		set randRoomId := round(rand()*roomSize);
+		select id from room limit 1 offset randRoomId into roomId;
+        
+		# set booked_by
+        select count(*) from user where id in (select user_id from room_user where room_id = roomId) into userSize;
+		set randUserId := round(rand()*userSize);
+		select id from user limit 1 offset randUserId into userId;
+        
+		# set date
+        select date(now()) + interval round(rand()*10) day into theDate;
+        
+        # set from
+        select timestamp(theDate)+interval round(rand()*22) hour into theFrom;
+        
+        # set to
+        select timestamp(theFrom) + interval round(rand()*1)+1 hour into theTo;
+        
+        insert into booking ( date, from_time, public_id, to_time, booked_by, room_id) values ( theDate, theFrom, UUID(), theTo, userId, roomId);
+        
+    set count:=count+1;
     end while;
-    
-    select id from room where public_id = theRoomPublicId into roomId;
-    
-    select s.from, s.to, r.date,r.from_time,r.to_time from slots s 
-    left join (select * from booking  where room_id = roomId and `date` = theDate) as r on 
-    (r.from_time <= s.from and r.to_time > s.from) 
-    or (r.from_time >= s.from and r.from_time < s.to)
-    where r.id is null
-    ;
-    
-    drop temporary table slots;
+
 end$$
 DELIMITER ;
