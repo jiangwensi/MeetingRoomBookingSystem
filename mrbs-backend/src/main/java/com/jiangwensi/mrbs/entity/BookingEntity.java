@@ -7,7 +7,12 @@ import java.util.Date;
  * Created by Jiang Wensi on 15/8/2020
  */
 @Entity
-@Table(name = "booking")
+@Table(name = "booking",indexes = {
+        @Index(name="booking_date_index",columnList = "date"),
+        @Index(name="booking_room_id_index",columnList = "room_id"),
+        @Index(name="booking_to_time_index",columnList = "toTime"),
+        @Index(name="booking_from_time_index",columnList = "fromTime")
+})
 public class BookingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

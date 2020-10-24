@@ -2,6 +2,7 @@ package com.jiangwensi.mrbs.repo;
 
 import com.jiangwensi.mrbs.entity.BookingEntity;
 import com.jiangwensi.mrbs.entity.Slot;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,23 +25,40 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
 
     BookingEntity findByPublicId(String bookingId);
 
+    //    @Query(nativeQuery = true,
+//            value = "select * from booking where booked_by =:bookedBy " +
+//                    "and room_id in (select id from room where name like CONCAT('%', :roomName, '%')) " +
+//                    "and ((from_time>=:fromDate and from_time<=:toDate) or (from_time<=:fromDate and " +
+//                    "to_time>=:fromDate))")
     @Query(nativeQuery = true,
-            value = "select * from booking where booked_by =:bookedBy " +
-                    "and room_id in (select id from room where name like CONCAT('%', :roomName, '%')) " +
-                    "and ((from_time>=:fromDate and from_time<=:toDate) or (from_time<=:fromDate and " +
-                    "to_time>=:fromDate))")
-    List<BookingEntity> search(@Param("bookedBy") String bookedBy, @Param("roomName") String roomName,
-                               @Param("fromDate") String fromDate, @Param("toDate") String toDate);
+            value = "select b.* from booking b " +
+                    "join room r on b.room_id = r.id " +
+                    "join user u on u.id = b.booked_by " +
+                    "where r.public_id = :roomPublicId " +
+                    "and b.date = :date " +
+                    "and u.public_id = :bookedBy")
+    List<BookingEntity> search(@Param("bookedBy") String bookedBy, @Param("roomPublicId") String roomPublicId,
+                               @Param("date") String date);
+
+//    @Query(nativeQuery = true,
+//            value = "select * from booking where room_id in (select id from room where name like CONCAT('%', " +
+//                    "ifnull(:roomName,''), '%')) " +
+//                    "and ((from_time>=:fromDate and from_time<=:toDate) or (from_time<=:fromDate and " +
+//                    "to_time>=:fromDate))")
+//
 
     @Query(nativeQuery = true,
-            value = "select * from booking where room_id in (select id from room where name like CONCAT('%', " +
-                    "ifnull(:roomName,''), '%')) " +
-                    "and ((from_time>=:fromDate and from_time<=:toDate) or (from_time<=:fromDate and " +
-                    "to_time>=:fromDate))")
-    List<BookingEntity> searchBySysAdm(String roomName, String fromDate, String toDate);
+            value = "select b.* from booking b join room r on b.room_id = r.id where r.public_id = :roomPublicId and b.date =" +
+                    " :date")
+    List<BookingEntity> searchBySysAdm(@Param("roomPublicId") String roomPublicId, @Param("date") String date);
 
     @Query(nativeQuery = true, value = "call getAvailableTimeslot(:roomId,:date)")
     List<Slot> getAvailableSlots(@Param("roomId") String roomId, @Param("date") String date);
+
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from booking where room_id in (select id from room where " +
+            "public_id =:roomId)")
+    void deleteBookingByRoom(@Param("roomId") String publicId);
 
 
     //    @Query(nativeQuery = true,

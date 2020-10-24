@@ -3,6 +3,7 @@ package com.jiangwensi.mrbs.service;
 import com.jiangwensi.mrbs.AppProperties;
 import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
+import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.BookingEntity;
 import com.jiangwensi.mrbs.entity.RoomEntity;
 import com.jiangwensi.mrbs.entity.Slot;
@@ -17,7 +18,9 @@ import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -32,14 +35,17 @@ import java.util.UUID;
  */
 @Service
 public class BookingServiceImpl implements BookingService {
-    @Autowired
     private BookingRepository bookingRepo;
-
-    @Autowired
+    private UserService userService;
     private UserRepository userRepository;
-
-    @Autowired
     private RoomRepository roomRepository;
+
+    public BookingServiceImpl(BookingRepository bookingRepo, UserService userService, UserRepository userRepository, RoomRepository roomRepository) {
+        this.bookingRepo = bookingRepo;
+        this.userService = userService;
+        this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
+    }
 
     @Override
     public BookingDto createBooking(String bookedBy, String roomId, String from, String to) throws ParseException {
@@ -62,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
         BookingEntity bookingEntity = new BookingEntity();
         bookingEntity.setBookedBy(userEntity);
         bookingEntity.setRoom(roomEntity);
+        bookingEntity.setDate(new SimpleDateFormat(timeformat).parse(from));
         bookingEntity.setFromTime(new SimpleDateFormat(timeformat).parse(from));
         bookingEntity.setToTime(new SimpleDateFormat(timeformat).parse(to));
         bookingEntity.setPublicId(UUID.randomUUID().toString());
@@ -116,72 +123,27 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> search(Boolean isSysAdm,String bookedBy, String roomName, String fromDate, String toDate) {
+    public List<BookingDto> search(String roomPublicId, String date) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = userService.findUserByEmail(auth.getName());
+        boolean isSysAdm =
+                auth.getAuthorities().contains(new SimpleGrantedAuthority("SYSADM"));
+
+
+        if(date!=null && date!=""){
+            if(MyDateUtils.isValidFormat(date)) {
+                throw new InvalidInputException("Invalid date format " + date);
+            }
+        }
+
         List<BookingEntity> bookingEntities = new ArrayList<>();
 
-//        boolean hasBookedBy = !StringUtils.isEmpty(bookedBy);
-//
-//        boolean hasRoomId = !StringUtils.isEmpty(roomName);
-
-        if(fromDate!=null && fromDate!=""){
-            if(MyDateUtils.isValidFormat(fromDate)) {
-                throw new InvalidInputException("Invalid date format " + fromDate);
-            }
-        }else {
-            fromDate ="1000-01-01";
-        }
-
-        if(toDate!=null && toDate!=""){
-            if(MyDateUtils.isValidFormat(toDate)){
-                throw new InvalidInputException("Invalid date format "+toDate);
-            }
-        } else {
-            toDate = "9999-12-31";
-        }
-
         if(isSysAdm){
-            bookingEntities = bookingRepo.searchBySysAdm(roomName, fromDate, toDate);
+            bookingEntities = bookingRepo.searchBySysAdm(roomPublicId, date);
         } else {
-            bookingEntities = bookingRepo.search(bookedBy, roomName, fromDate, toDate);
+            bookingEntities = bookingRepo.search(userDto.getPublicId(), roomPublicId, date);
         }
-
-
-
-
-//
-//        if (!hasBookedBy && !hasRoomId && !hasDate) {
-//
-//            bookingEntities = IteratorUtils.toList(bookingRepo.findAll().iterator());
-//
-//        } else if (hasBookedBy && !hasRoomId && !hasDate) {
-//
-//            bookingEntities = bookingRepo.searchByBookedBy(bookedBy);
-//
-//        } else if (!hasBookedBy && hasRoomId && !hasDate) {
-//
-//            bookingEntities = bookingRepo.searchByRoomId(roomId);
-//
-//        } else if (!hasBookedBy && !hasRoomId && hasDate) {
-//
-//            bookingEntities = bookingRepo.searchByDate(date);
-//
-//        } else if (!hasBookedBy && hasRoomId && hasDate) {
-//
-//            bookingEntities = bookingRepo.searchByRoomIdAndDate(roomId, date);
-//
-//        } else if (hasBookedBy && !hasRoomId && hasDate) {
-//
-//            bookingEntities = bookingRepo.searchByBookedByAndDate(bookedBy, date);
-//
-//        } else if (hasBookedBy && hasRoomId && !hasDate) {
-//
-//            bookingEntities = bookingRepo.searchByBookedByAndRoomId(bookedBy, roomId);
-//
-//        } else if (hasBookedBy && hasRoomId && hasDate) {
-//
-//            bookingEntities = bookingRepo.search(bookedBy, roomId, date);
-//
-//        }
 
         List<BookingDto> returnValue = new ArrayList<>();
         for (BookingEntity bookingEntity : bookingEntities) {

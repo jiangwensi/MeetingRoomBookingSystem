@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.spi.MappingContext;
 import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -242,8 +243,9 @@ public class MyModelMapper {
                 BookingEntity s = context.getSource();
                 BookingDto d = context.getDestination();
                 d.setBookedBy(s.getBookedBy().getPublicId());
-                d.setFromTime(s.getFromTime());
-                d.setToTime(s.getToTime());
+                d.setDate(new SimpleDateFormat("yyyy-MM-dd").format(s.getDate()));
+                d.setFromTime(new SimpleDateFormat("HH:mm:ss").format(s.getFromTime()));
+                d.setToTime(new SimpleDateFormat("HH:mm:ss").format(s.getToTime()));
                 d.setPublicId(s.getPublicId());
                 d.setRoomId(s.getRoom().getPublicId());
                 return d;

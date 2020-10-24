@@ -279,6 +279,8 @@ public class RoomServiceImpl implements RoomService {
     public void deleteRoom(String publicId) {
         log.info("deleteRoom publicId:" + publicId);
 
+        bookingRepo.deleteBookingByRoom(publicId);
+
         RoomEntity roomEntity = roomRepo.findByPublicId(publicId);
         if (roomEntity == null) {
             throw new NotFoundException("Unable to find room by id:" + publicId);
@@ -506,7 +508,12 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public boolean isUserAccessingRoom(String roomPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
+        RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
+        List<UserEntity> userEntitys =
+                roomEntity.getUsers().stream().filter(e->e.getEmail().equalsIgnoreCase(auth.getName())).collect(Collectors.toList());
+        if(userEntitys!=null && userEntitys.size()==1){
+            return true;
+        }
         return false;
     }
 }

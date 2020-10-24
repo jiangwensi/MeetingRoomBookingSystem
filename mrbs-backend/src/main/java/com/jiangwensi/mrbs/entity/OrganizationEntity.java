@@ -17,7 +17,7 @@ public class OrganizationEntity {
     @Column(nullable = false)
     private String publicId;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(nullable = false, length = 200, unique = true)
     private String name;
 
     @ManyToMany

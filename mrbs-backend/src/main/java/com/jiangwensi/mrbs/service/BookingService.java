@@ -22,7 +22,7 @@ public interface BookingService {
 
     void deleteBooking(String publicId);
 
-    List<BookingDto> search(Boolean isSysAdm, String bookedBy, String roomId, String fromDate,String toDate);
+    List<BookingDto> search(String roomId, String date);
 
     List<AvailableTimeslotDto> fetchAvailableslotByRoom(String roomId, String date);
 }

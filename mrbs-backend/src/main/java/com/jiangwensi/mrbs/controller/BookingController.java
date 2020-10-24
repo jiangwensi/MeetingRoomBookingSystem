@@ -22,7 +22,6 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -91,15 +90,11 @@ public class BookingController {
 //    }
 
     @GetMapping
-    public SearchBookingResponse searchBooking(@RequestParam(required = false) String roomName,
-                                               @RequestParam(required = false) String fromDate,
-                                               @RequestParam(required = false) String toDate) {
+    public SearchBookingResponse searchBooking(@RequestParam(required = false) String roomId,
+                                               @RequestParam(required = false) String date) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-        boolean isSysAdm =
-                auth.getAuthorities().contains(new SimpleGrantedAuthority("SYSADM"));
-        List<BookingDto> bookingDtos = bookingService.search(isSysAdm, userDto.getPublicId(), roomName, fromDate, toDate);
+
+        List<BookingDto> bookingDtos = bookingService.search(roomId, date);
         SearchBookingResponse returnValue = new SearchBookingResponse();
         List<SearchBookingResponseItem> bookings = new ModelMapper().map(bookingDtos, new TypeToken<ArrayList<SearchBookingResponseItem>>() {
         }.getType());

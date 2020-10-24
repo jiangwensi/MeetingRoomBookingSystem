@@ -42,13 +42,14 @@ public class BookingRequest {
         this.roomId = roomId;
     }
 
+
     @Override
     public String toString() {
         return "BookingRequest{" +
                 "publicId='" + publicId + '\'' +
                 ", fromTime='" + fromTime + '\'' +
                 ", toTime='" + toTime + '\'' +
-                ", room='" + roomId + '\'' +
+                ", roomId='" + roomId + '\'' +
                 '}';
     }
 }

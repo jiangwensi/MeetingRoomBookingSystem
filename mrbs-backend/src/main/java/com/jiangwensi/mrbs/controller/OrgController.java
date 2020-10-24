@@ -55,9 +55,9 @@ public class OrgController {
 
         log.info("listOrganization() name:"+name+",active="+active);
 
-        if(!hasAuthorizedRole(RoleName.SYSADM.getName()) && !isOwningSomeOrganization()){
-            throw new AccessDeniedException("You are not allowed to search organization ");
-        };
+//        if(!hasAuthorizedRole(RoleName.SYSADM.getName()) && !isOwningSomeOrganization()){
+//            throw new AccessDeniedException("You are not allowed to search organization ");
+//        };
 
         List<OrganizationDto> organizationDtos = orgService.search(name,active);
 

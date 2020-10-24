@@ -1,14 +1,13 @@
 package com.jiangwensi.mrbs.dto;
 
-import java.util.Date;
-
 /**
  * Created by Jiang Wensi on 16/8/2020
  */
 public class BookingDto {
     private String publicId;
-    private Date fromTime;
-    private Date toTime;
+    private String date;
+    private String fromTime;
+    private String toTime;
     private String roomId;
     private String bookedBy;
 
@@ -20,19 +19,27 @@ public class BookingDto {
         this.publicId = publicId;
     }
 
-    public Date getFromTime() {
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getFromTime() {
         return fromTime;
     }
 
-    public void setFromTime(Date fromTime) {
+    public void setFromTime(String fromTime) {
         this.fromTime = fromTime;
     }
 
-    public Date getToTime() {
+    public String getToTime() {
         return toTime;
     }
 
-    public void setToTime(Date toTime) {
+    public void setToTime(String toTime) {
         this.toTime = toTime;
     }
 
