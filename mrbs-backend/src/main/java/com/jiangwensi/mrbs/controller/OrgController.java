@@ -31,7 +31,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jiang Wensi on 17/8/2020
@@ -61,12 +60,12 @@ public class OrgController {
 
         List<OrganizationDto> organizationDtos = orgService.search(name,active);
 
-        if(!hasAuthorizedRole(RoleName.SYSADM.getName()) && isOwningSomeOrganization()){
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            List<String> orgsOwnedByMeStr = userService.findUserByEmail(auth.getName()).getIsAdminOfOrganizations();
-            List<OrganizationDto> orgsOwnedByMe = orgsOwnedByMeStr.stream().map(o->orgService.viewOrganization(o)).collect(Collectors.toList());
-            organizationDtos = orgsOwnedByMe.stream().filter(organizationDtos::contains).collect(Collectors.toList());
-        }
+//        if(!hasAuthorizedRole(RoleName.SYSADM.getName()) && isOwningSomeOrganization()){
+//            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//            List<String> orgsOwnedByMeStr = userService.findUserByEmail(auth.getName()).getIsAdminOfOrganizations();
+//            List<OrganizationDto> orgsOwnedByMe = orgsOwnedByMeStr.stream().map(o->orgService.viewOrganization(o)).collect(Collectors.toList());
+//            organizationDtos = orgsOwnedByMe.stream().filter(organizationDtos::contains).collect(Collectors.toList());
+//        }
 
         SearchOrganizationResponse returnValue = new SearchOrganizationResponse();
 

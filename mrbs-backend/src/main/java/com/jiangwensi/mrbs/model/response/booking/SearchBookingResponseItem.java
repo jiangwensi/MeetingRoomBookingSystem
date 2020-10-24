@@ -5,6 +5,7 @@ package com.jiangwensi.mrbs.model.response.booking;
  */
 public class SearchBookingResponseItem {
     private String publicId;
+    private String date;
     private String fromTime;
     private String toTime;
     private String roomId;
@@ -48,5 +49,13 @@ public class SearchBookingResponseItem {
 
     public void setBookedBy(String bookedBy) {
         this.bookedBy = bookedBy;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

@@ -48,7 +48,8 @@ public class RoomEntity {
     @JoinTable(
             name = "room_admin",
             joinColumns = @JoinColumn(name = "room_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id"),
+            uniqueConstraints = @UniqueConstraint(name="room_admin_unique_index",columnNames = {"room_id","user_id"})
     )
     private List<UserEntity> admins;
 
@@ -56,7 +57,8 @@ public class RoomEntity {
     @JoinTable(
             name = "room_user",
             joinColumns = @JoinColumn(name = "room_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id"),
+            uniqueConstraints = @UniqueConstraint(name="room_user_unique_index",columnNames = {"room_id","user_id"})
     )
     private List<UserEntity> users;
 

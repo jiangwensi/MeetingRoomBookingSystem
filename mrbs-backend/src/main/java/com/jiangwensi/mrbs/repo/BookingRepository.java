@@ -34,10 +34,12 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
             value = "select b.* from booking b " +
                     "join room r on b.room_id = r.id " +
                     "join user u on u.id = b.booked_by " +
-                    "where r.public_id = :roomPublicId " +
-                    "and b.date = :date " +
-                    "and u.public_id = :bookedBy")
-    List<BookingEntity> search(@Param("bookedBy") String bookedBy, @Param("roomPublicId") String roomPublicId,
+                    "where r.public_id like concat('%',ifnull(:roomPublicId,''),'%') " +
+                    "and (b.date = :date or :date is null) " +
+                    "and u.public_id = :bookedBy  " +
+                    "order by b.from_time asc")
+    List<BookingEntity> search(@Param("bookedBy") String bookedBy,
+                               @Param("roomPublicId") String roomPublicId,
                                @Param("date") String date);
 
 //    @Query(nativeQuery = true,
@@ -48,8 +50,10 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
 //
 
     @Query(nativeQuery = true,
-            value = "select b.* from booking b join room r on b.room_id = r.id where r.public_id = :roomPublicId and b.date =" +
-                    " :date")
+            value = "select b.* from booking b " +
+                    "join room r on b.room_id = r.id " +
+                    "where r.public_id like concat('%',ifnull(:roomPublicId,''),'%') " +
+                    "and (b.date = :date  or :date is null) order by b.from_time asc")
     List<BookingEntity> searchBySysAdm(@Param("roomPublicId") String roomPublicId, @Param("date") String date);
 
     @Query(nativeQuery = true, value = "call getAvailableTimeslot(:roomId,:date)")
@@ -57,7 +61,7 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
 
     @Modifying
     @Query(nativeQuery = true, value = "delete from booking where room_id in (select id from room where " +
-            "public_id =:roomId)")
+            "public_id =:roomId) ")
     void deleteBookingByRoom(@Param("roomId") String publicId);
 
 

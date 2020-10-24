@@ -85,7 +85,6 @@ public class RoomController extends BaseController {
 
         returnValue.setStatus(MyResponseStatus.success.name());
         returnValue.setMessage("View room is successful");
-        System.out.println(returnValue.getImages().get(0));
         return returnValue;
     }
 
