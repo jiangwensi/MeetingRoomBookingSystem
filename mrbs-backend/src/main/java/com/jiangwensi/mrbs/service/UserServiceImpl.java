@@ -232,10 +232,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(String publicId) {
         log.info("deleteUser publicId:" + publicId);
+        //delete user's booking
         UserEntity userEntity = userRepository.findByPublicId(publicId);
         if (userEntity == null) {
             throw new NotFoundException("Unable to find user");
         }
+        bookingRepository.deleteBookingByBookedBy(userEntity.getId());
 
         List<RoleEntity> roleEntities = userEntity.getRoles();
         for (RoleEntity roleEntity : roleEntities) {

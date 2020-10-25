@@ -60,4 +60,8 @@ public interface BookingRepository extends CrudRepository<BookingEntity, Long> {
     void deleteByRoomId(@Param("roomId") Long roomId);
 
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from booking where booked_by = :userId")
+    void deleteBookingByBookedBy(@Param("userId") Long userId);
 }

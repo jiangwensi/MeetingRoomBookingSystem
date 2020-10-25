@@ -55,6 +55,7 @@ public class AdviceExceptionHandler {
         return generalErrorResponse(e, true);
     }
 
+
     private GeneralResponse generalErrorResponse(Exception e, boolean hideMessage) {
         GeneralResponse response = new GeneralResponse();
 

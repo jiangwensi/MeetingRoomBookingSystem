@@ -3,6 +3,7 @@ package com.jiangwensi.mrbs.controller;
 import com.jiangwensi.mrbs.constant.MyResponseStatus;
 import com.jiangwensi.mrbs.constant.PathConst;
 import com.jiangwensi.mrbs.dto.UserDto;
+import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.UnknownErrorException;
 import com.jiangwensi.mrbs.model.request.user.UpdateMyProfileRequest;
 import com.jiangwensi.mrbs.model.request.user.UpdateUserRequest;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.context.annotation.Scope;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -159,7 +161,12 @@ public class UserController {
     @DeleteMapping(PathConst.USER_PATH + "/{publicId}")
     @PreAuthorize("hasAuthority('SYSADM')")
     public GeneralResponse deleteUser(@PathVariable String publicId) {
-        userService.deleteUser(publicId);
+        try{
+            userService.deleteUser(publicId);
+        } catch (DataIntegrityViolationException e){
+            throw new InvalidInputException("Unable to delete this user. Please make sure this user is not admin or " +
+                    "user of a room or organization");
+        }
         GeneralResponse returnValue = new GeneralResponse();
         returnValue.setStatus(MyResponseStatus.success.toString());
         returnValue.setMessage("User is deleted");
