@@ -15,6 +15,7 @@ public class UserResponse extends GeneralResponse {
     private boolean active; 
     private boolean emailVerified;
     private List<String> isAdminOfRooms;
+    private List<String> isUserOfRooms;
     private List<String> isAdminOfOrganizations;
     private List<String> roles;
 
@@ -80,5 +81,13 @@ public class UserResponse extends GeneralResponse {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public List<String> getIsUserOfRooms() {
+        return isUserOfRooms;
+    }
+
+    public void setIsUserOfRooms(List<String> isUserOfRooms) {
+        this.isUserOfRooms = isUserOfRooms;
     }
 }

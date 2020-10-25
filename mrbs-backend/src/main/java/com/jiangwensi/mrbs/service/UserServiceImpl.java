@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> search(String name, String email, List<String> role, List<Boolean> active,
-                                List<Boolean> verified) {
+                                List<Boolean> verified,Boolean verbose) {
         List<UserEntity> userEntities = new ArrayList<>();
         boolean nameEmpty = MyStringUtils.isEmpty(name);
         boolean emailEmpty = MyStringUtils.isEmpty(email);
@@ -205,6 +205,13 @@ public class UserServiceImpl implements UserService {
         if (userEntities != null && userEntities.size() > 0) {
             for (UserEntity e : userEntities) {
                 UserDto userDto = new UserDto();
+                if(verbose==null || verbose==false) {
+                    e.setBookings(null);
+                    e.setIsAdminOfOrganizations(null);
+                    e.setIsAdminOfRooms(null);
+                    e.setIsUserOfRooms(null);
+                }
+
                 MyModelMapper.userEntityToUserDtoModelMapper().map(e, userDto);
                 returnValue.add(userDto);
             }

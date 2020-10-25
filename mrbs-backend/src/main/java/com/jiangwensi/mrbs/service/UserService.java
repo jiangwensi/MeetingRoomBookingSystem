@@ -22,7 +22,7 @@ public interface UserService extends UserDetailsService {
 
 
     List<UserDto> search(String name, String email, List<String> role, List<Boolean> active,
-                         List<Boolean> verified);
+                         List<Boolean> verified,Boolean verbose);
 
     UserDto findUserByPublicId(String publicId);
 

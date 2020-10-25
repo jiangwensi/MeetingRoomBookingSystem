@@ -50,12 +50,13 @@ public class UserController {
             @RequestParam(required = false) String email,
             @RequestParam(required = false, name = "role") List<String> roles,
             @RequestParam(required = false, name = "active") List<Boolean> actives,
-            @RequestParam(required = false, name = "verified") List<Boolean> verifies) {
+            @RequestParam(required = false, name = "verified") List<Boolean> verifies,
+            @RequestParam(required = false, name = "verbose") Boolean verbose) {
 
         email = MyStringUtils.toUpperCaseAndTrim(email);
         roles = MyStringUtils.toUpperCaseAndTrim(roles);
 
-        List<UserDto> userDtos = userService.search(name, email, roles, actives, verifies);
+        List<UserDto> userDtos = userService.search(name, email, roles, actives, verifies,verbose);
 
         SearchUserResponse returnValue = new SearchUserResponse();
         if (userDtos

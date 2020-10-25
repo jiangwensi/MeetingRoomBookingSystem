@@ -34,8 +34,15 @@ public class MyModelMapper {
                 dto.setPublicId(entity.getPublicId());
                 dto.setActive(entity.isActive());
                 dto.setEmailVerified(entity.isEmailVerified());
-                dto.setIsAdminOfOrganizations(entity.getIsAdminOfOrganizations().stream().map(e -> e.getPublicId()).collect(Collectors.toList()));
-                dto.setIsAdminOfRooms(entity.getIsAdminOfRooms().stream().map(e -> e.getName()).collect(Collectors.toList()));
+                if(entity.getIsAdminOfOrganizations()!=null){
+                    dto.setIsAdminOfOrganizations(entity.getIsAdminOfOrganizations().stream().map(e -> e.getPublicId()).collect(Collectors.toList()));
+                }
+                if(entity.getIsAdminOfRooms()!=null){
+                    dto.setIsAdminOfRooms(entity.getIsAdminOfRooms().stream().map(e -> e.getName()).collect(Collectors.toList()));
+                }
+                if(entity.getIsUserOfRooms()!=null){
+                    dto.setIsUserOfRooms(entity.getIsUserOfRooms().stream().map(e -> e.getName()).collect(Collectors.toList()));
+                }
                 dto.setRoles(entity.getRoles().stream().map(e -> e.getName()).collect(Collectors.toList()));
                 dto.setTokens(entity.getTokens().stream().map(e->e.getToken()).collect(Collectors.toList()));
                 return dto;
@@ -63,6 +70,9 @@ public class MyModelMapper {
                 userResponse.setIsAdminOfOrganizations(userDto.getIsAdminOfOrganizations() == null ?
                         old.getIsAdminOfOrganizations() : userDto.getIsAdminOfOrganizations());
                 userResponse.setIsAdminOfRooms(userDto.getIsAdminOfRooms() == null ? old.getIsAdminOfRooms() : userDto.getIsAdminOfRooms());
+
+                userResponse.setIsUserOfRooms(userDto.getIsUserOfRooms() == null ? old.getIsUserOfRooms() :
+                        userDto.getIsAdminOfRooms());
                 userResponse.setRoles(userDto.getRoles() == null ? old.getRoles() : userDto.getRoles());
 
                 if (!StringUtils.isEmpty(old.getErrorMessage())) {

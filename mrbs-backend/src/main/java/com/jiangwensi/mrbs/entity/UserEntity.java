@@ -57,6 +57,8 @@ public class UserEntity {
     @ManyToMany(mappedBy = "admins")
     private List<RoomEntity> isAdminOfRooms = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "users")
+    private List<RoomEntity> isUserOfRooms = new ArrayList<>();
 
     public UserEntity() {
     }
@@ -176,5 +178,13 @@ public class UserEntity {
 
     public void setIsAdminOfRooms(List<RoomEntity> isAdminOfRooms) {
         this.isAdminOfRooms = isAdminOfRooms;
+    }
+
+    public List<RoomEntity> getIsUserOfRooms() {
+        return isUserOfRooms;
+    }
+
+    public void setIsUserOfRooms(List<RoomEntity> isUserOfRooms) {
+        this.isUserOfRooms = isUserOfRooms;
     }
 }

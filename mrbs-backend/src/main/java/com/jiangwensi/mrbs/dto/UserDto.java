@@ -19,6 +19,7 @@ public class UserDto {
     private List<BookingDto> bookings = new ArrayList<>();
     private List<String> isAdminOfOrganizations = new ArrayList<>();
     private List<String> isAdminOfRooms = new ArrayList<>();
+    private List<String> isUserOfRooms = new ArrayList<>();
 
     public String getPublicId() {
         return publicId;
@@ -114,5 +115,13 @@ public class UserDto {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public List<String> getIsUserOfRooms() {
+        return isUserOfRooms;
+    }
+
+    public void setIsUserOfRooms(List<String> isUserOfRooms) {
+        this.isUserOfRooms = isUserOfRooms;
     }
 }
