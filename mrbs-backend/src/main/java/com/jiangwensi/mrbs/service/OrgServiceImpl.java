@@ -6,8 +6,6 @@ import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.OrganizationEntity;
 import com.jiangwensi.mrbs.entity.RoomEntity;
 import com.jiangwensi.mrbs.entity.UserEntity;
-import com.jiangwensi.mrbs.enumeration.RoleName;
-import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
 import com.jiangwensi.mrbs.model.request.org.OrganizationRequest;
 import com.jiangwensi.mrbs.repo.BookingRepository;
@@ -79,9 +77,9 @@ public class OrgServiceImpl implements OrgService {
     public OrganizationDto viewOrganization(String publicId) {
 
 
-        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),publicId)){
-            throw new AccessDeniedException("You are not allowed to view organization "+publicId);
-        };
+//        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),publicId)){
+//            throw new AccessDeniedException("You are not allowed to view organization "+publicId);
+//        };
 
         OrganizationEntity organizationEntity = organizationRepository.findByPublicId(publicId);
         if (organizationEntity == null) {
@@ -196,9 +194,9 @@ public class OrgServiceImpl implements OrgService {
     @Override
     public List<UserDto> listAdminByOrg(String orgPublicId) {
 
-        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),orgPublicId)){
-            throw new AccessDeniedException("You are not allowed to view organization "+orgPublicId);
-        };
+//        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),orgPublicId)){
+//            throw new AccessDeniedException("You are not allowed to view organization "+orgPublicId);
+//        };
         List<UserDto> returnValue = new ArrayList<>();
         List<UserEntity> userEntities = organizationRepository.findByPublicId(orgPublicId).getAdmins();
         if (userEntities != null && userEntities.size() > 0) {
@@ -214,9 +212,9 @@ public class OrgServiceImpl implements OrgService {
     @Override
     public List<RoomDto> listRoomsByOrg(String orgPublicId) {
 
-        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),orgPublicId)){
-            throw new AccessDeniedException("You are not allowed to view organization "+orgPublicId);
-        };
+//        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),orgPublicId)){
+//            throw new AccessDeniedException("You are not allowed to view organization "+orgPublicId);
+//        };
         List<RoomDto> returnValue = new ArrayList<>();
         List<RoomEntity> roomEntities = organizationRepository.findByPublicId(orgPublicId).getRooms();
         if (roomEntities != null && roomEntities.size() > 0) {
