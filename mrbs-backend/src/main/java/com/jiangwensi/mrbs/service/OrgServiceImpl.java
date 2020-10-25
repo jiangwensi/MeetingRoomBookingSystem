@@ -17,7 +17,6 @@ import com.jiangwensi.mrbs.utils.MyStringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -46,17 +45,7 @@ public class OrgServiceImpl implements OrgService {
 
     @Override
     public List<OrganizationDto> search(String name, Boolean active) {
-        List<OrganizationEntity> organizationEntities = new ArrayList<>();
-        if (StringUtils.isEmpty(name) && active == null) {
-            organizationEntities = (List<OrganizationEntity>) organizationRepository.findAll();
-        } else if (StringUtils.isEmpty(name) && active != null) {
-            organizationEntities = (List<OrganizationEntity>) organizationRepository.findByActive(active);
-        } else if (!StringUtils.isEmpty(name) && active == null) {
-            organizationEntities = organizationRepository.findByNameLikeValue(name);
-        } else if (!StringUtils.isEmpty(name) && active != null) {
-            organizationEntities = (List<OrganizationEntity>) organizationRepository.findByNameLikeAndActive(name,
-                    active);
-        }
+        List<OrganizationEntity> organizationEntities = organizationRepository.findByNameAndActive(name,active);
 
         if (organizationEntities == null) {
             throw new NotFoundException("Unable to find organization name:" + name + ",active:" + active);
@@ -76,10 +65,6 @@ public class OrgServiceImpl implements OrgService {
     @Override
     public OrganizationDto viewOrganization(String publicId) {
 
-
-//        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),publicId)){
-//            throw new AccessDeniedException("You are not allowed to view organization "+publicId);
-//        };
 
         OrganizationEntity organizationEntity = organizationRepository.findByPublicId(publicId);
         if (organizationEntity == null) {
