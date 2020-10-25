@@ -80,6 +80,7 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
         loginResponse.setStatus(MyResponseStatus.success.name());
         loginResponse.setMessage("Login is successful");
         loginResponse.setName(userPrincipal.getName());
+        loginResponse.setUserPublicId(userId);
 
         String responseJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(loginResponse);
 

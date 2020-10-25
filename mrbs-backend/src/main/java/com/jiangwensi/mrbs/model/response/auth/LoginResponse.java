@@ -11,6 +11,7 @@ public class LoginResponse extends GeneralResponse {
     private String authToken;
     private String name;
     private Set<String> roles;
+    private String userPublicId;
 
     public String getAuthToken() {
         return authToken;
@@ -34,5 +35,13 @@ public class LoginResponse extends GeneralResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUserPublicId() {
+        return userPublicId;
+    }
+
+    public void setUserPublicId(String userPublicId) {
+        this.userPublicId = userPublicId;
     }
 }

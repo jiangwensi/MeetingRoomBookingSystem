@@ -63,13 +63,13 @@ public class RoomServiceImpl implements RoomService {
 
         roomEntities
                 .stream()
-                .filter(e ->
-                        userService.isOrgAdminAccessingRoom(e.getPublicId()) ||
-                                userService.isRoomAdminAccessingRoom(e.getPublicId()) ||
-                                userService.isUserAccessingRoom(e.getPublicId()) ||
-                                userService.isSysadmAccessingRoom(e.getPublicId()))
                 .forEach(e -> {
                     RoomDto roomDto = new RoomDto();
+                    if(!userService.isOrgAdminAccessingRoom(e.getPublicId()) &&
+                            !userService.isRoomAdminAccessingRoom(e.getPublicId()) &&
+                            !userService.isSysadmAccessingRoom(e.getPublicId())) {
+                        e.setUsers(null);
+                    }
                     mm.map(e, roomDto);
                     returnValue.add(roomDto);
                 });
@@ -81,12 +81,6 @@ public class RoomServiceImpl implements RoomService {
     public RoomDto viewRoom(String publicId) {
         log.info("viewRoom publicId:" + publicId);
 
-        if (!userService.isOrgAdminAccessingRoom(publicId)
-                && !userService.isRoomAdminAccessingRoom(publicId)
-                && !userService.isUserAccessingRoom(publicId)
-                && !userService.isSysadmAccessingRoom(publicId)) {
-            throw new AccessDeniedException("You are not allowed to view room " + publicId);
-        }
         RoomDto returnValue = new RoomDto();
         RoomEntity roomEntity = roomRepo.findByPublicId(publicId);
 
@@ -94,6 +88,13 @@ public class RoomServiceImpl implements RoomService {
             throw new NotFoundException("Unable to find room by publicId:" + publicId);
         }
 
+        if (!userService.isOrgAdminAccessingRoom(publicId)
+                && !userService.isRoomAdminAccessingRoom(publicId)
+//                && !userService.isUserAccessingRoom(publicId)
+                && !userService.isSysadmAccessingRoom(publicId)) {
+//            throw new AccessDeniedException("You are not allowed to view room " + publicId);
+            roomEntity.setUsers(null);
+        }
         ModelMapper mm = MyModelMapper.roomEntityToDtoModelMapper();
         mm.map(roomEntity, returnValue);
         return returnValue;
@@ -362,6 +363,7 @@ public class RoomServiceImpl implements RoomService {
     public List<UserDto> listEnrolledUsers(String roomId) {
         log.info("listEnrolledUsers roomId:" + roomId);
 
+
         if (!userService.isOrgAdminAccessingRoom(roomId) && !userService.isRoomAdminAccessingRoom(roomId)) {
             throw new AccessDeniedException("You are not allowed to enroll user for this room");
         }
@@ -384,6 +386,15 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<UserDto> listRoomUsers(String roomPublicId) {
+
+
+        if (!userService.isOrgAdminAccessingRoom(roomPublicId)
+                && !userService.isRoomAdminAccessingRoom(roomPublicId)
+//                && !userService.isUserAccessingRoom(publicId)
+                && !userService.isSysadmAccessingRoom(roomPublicId)) {
+            throw new AccessDeniedException("You are not allowed to list user for this room");
+//            roomEntity.setUsers(null);
+        }
         RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
 
         if (roomEntity == null) {
