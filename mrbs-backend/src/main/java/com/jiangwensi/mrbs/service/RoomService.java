@@ -14,7 +14,7 @@ import java.util.List;
  * Created by Jiang Wensi on 25/8/2020
  */
 public interface RoomService {
-    List<RoomDto> searchRoom(String name, String orgName,Boolean active);
+    List<RoomDto> searchRoom(String name, String orgName,Boolean active,Boolean myEnrolledRoomOnly);
 
     RoomDto viewRoom(String publicId);
 

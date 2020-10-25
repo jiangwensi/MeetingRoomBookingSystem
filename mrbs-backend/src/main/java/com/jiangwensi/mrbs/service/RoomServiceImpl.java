@@ -15,6 +15,8 @@ import com.jiangwensi.mrbs.utils.MyStringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,7 +52,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<RoomDto> searchRoom(String name, String orgName, Boolean active) {
+    public List<RoomDto> searchRoom(String name, String orgName, Boolean active,Boolean myEnrolledRoomOnly) {
 
         List<RoomDto> returnValue = new ArrayList<>();
         List<RoomEntity> roomEntities = roomRepo.searchRoom(name, orgName, active);
@@ -63,6 +65,11 @@ public class RoomServiceImpl implements RoomService {
 
         roomEntities
                 .stream()
+                .filter(
+                        e-> myEnrolledRoomOnly==null
+                                || !myEnrolledRoomOnly
+                                || (myEnrolledRoomOnly&&userService.isAccessedByRoomUser(e.getPublicId()))
+                                || (myEnrolledRoomOnly&&userService.isRoomAdminAccessingRoom(e.getPublicId())))
                 .forEach(e -> {
                     RoomDto roomDto = new RoomDto();
                     if(!userService.isOrgAdminAccessingRoom(e.getPublicId()) &&
@@ -93,7 +100,10 @@ public class RoomServiceImpl implements RoomService {
 //                && !userService.isUserAccessingRoom(publicId)
                 && !userService.isSysadmAccessingRoom(publicId)) {
 //            throw new AccessDeniedException("You are not allowed to view room " + publicId);
-            roomEntity.setUsers(null);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserEntity userEntity = userRepo.findByEmail(auth.getName());
+            String myPublicId = userEntity.getPublicId();
+            roomEntity.getUsers().stream().filter(e->e.getPublicId().equals(myPublicId));
         }
         ModelMapper mm = MyModelMapper.roomEntityToDtoModelMapper();
         mm.map(roomEntity, returnValue);

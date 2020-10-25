@@ -53,10 +53,11 @@ public class RoomController extends BaseController {
     @GetMapping
     public SearchRoomResponse search(@RequestParam(required = false, value = "roomName") String name,
                                      @RequestParam(required = false, value = "orgName") String orgName,
-                                     @RequestParam(required = false) Boolean active) {
+                                     @RequestParam(required = false) Boolean active,
+                                     @RequestParam(required = false) Boolean myEnrolledRoomOnly) {
         log.info("search name:" + name + ",active:" + active);
 
-        List<RoomDto> roomDtos = roomService.searchRoom(name, orgName, active);
+        List<RoomDto> roomDtos = roomService.searchRoom(name, orgName, active,myEnrolledRoomOnly);
 
         List<SearchRoomResponseItem> items = new ModelMapper().map(roomDtos,
                 new TypeToken<List<SearchRoomResponseItem>>() {
