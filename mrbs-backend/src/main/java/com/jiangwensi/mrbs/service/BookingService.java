@@ -2,6 +2,7 @@ package com.jiangwensi.mrbs.service;
 
 import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
+import com.jiangwensi.mrbs.model.request.booking.BookingRequest;
 
 import java.text.ParseException;
 import java.util.List;
@@ -12,11 +13,9 @@ import java.util.List;
 public interface BookingService {
 
 
-//    List<BookingDto> searchBooking(String bookedBy, String roomName, String fromDate, String toDate);
+    BookingDto createBooking(BookingRequest bookingRequest) throws ParseException;
 
-    BookingDto createBooking(String bookedBy, String roomId, String from, String to) throws ParseException;
-
-    BookingDto updateBooking(String publicId, String room, String fromTime, String toTime) throws ParseException;
+    BookingDto updateBooking(BookingRequest bookingRequest) throws ParseException;
 
     BookingDto viewBooking(String bookingId);
 

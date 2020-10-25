@@ -11,11 +11,6 @@ public interface TokenRepository extends JpaRepository<TokenEntity,Long> {
     TokenEntity findByToken(String token);
     void deleteById(long id);
     void deleteByToken(String token);
-
-
     void deleteByUserIdAndType(long id, String name);
-
     TokenEntity findByUserIdAndType(long id, String name);
-
-//    TokenEntity findByEmailAndType();
 }

@@ -1,10 +1,8 @@
 package com.jiangwensi.mrbs.service;
 
-import com.jiangwensi.mrbs.dto.AvailableTimeslotDto;
 import com.jiangwensi.mrbs.dto.BookingDto;
 import com.jiangwensi.mrbs.dto.RoomDto;
 import com.jiangwensi.mrbs.dto.UserDto;
-import com.jiangwensi.mrbs.model.request.room.BlockedTimeSlot;
 import com.jiangwensi.mrbs.model.request.room.RoomRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,11 +25,7 @@ public interface RoomService {
     @Transactional
     RoomDto createRoom(RoomRequest request, MultipartFile[] roomImages) throws IOException;
 
-    RoomDto updateRoom(String publicId, String name, Integer capacity, String facilities, String description,
-                       Boolean active,
-                       String organization,
-                       List<String> admins,
-                       List<String> users, List<BlockedTimeSlot> blockedTimeslots);
+    RoomDto updateRoom(RoomRequest request);
 
     void deleteRoom(String publicId);
 
@@ -46,16 +40,4 @@ public interface RoomService {
     List<UserDto> listRoomAdmins(String roomPublicId);
 
     List<BookingDto> listRoomBookings(String roomPublicId);
-
-    List<AvailableTimeslotDto> listAvailableTimeslots(String roomPublicId, String date);
-
-    boolean isAccessingMyOrg(String orgPublicId);
-
-    boolean isAccessingMyRoomOrgAdmin(String roomPublicId);
-
-    boolean isOrgAdminAccessingRoom(String roomPublicId);
-
-    boolean isRoomAdminAccessingRoom(String roomPublicId);
-
-    boolean isUserAccessingRoom(String roomPublicId);
 }

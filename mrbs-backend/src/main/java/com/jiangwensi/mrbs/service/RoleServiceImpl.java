@@ -4,7 +4,6 @@ import com.jiangwensi.mrbs.entity.RoleEntity;
 import com.jiangwensi.mrbs.repo.RoleRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.IteratorUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,8 +15,11 @@ import java.util.List;
 @Service
 @Slf4j
 public class RoleServiceImpl implements RoleService {
-    @Autowired
     private RoleRepository roleRepository;
+
+    public RoleServiceImpl(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
 
     @Override
     public List<String> listAllRoles() {

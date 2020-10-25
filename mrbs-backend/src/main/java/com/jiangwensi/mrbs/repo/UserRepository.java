@@ -13,7 +13,6 @@ import java.util.UUID;
 /**
  * Created by Jiang Wensi on 15/8/2020
  */
-@Repository
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     UserEntity findByEmail(String email);
 //

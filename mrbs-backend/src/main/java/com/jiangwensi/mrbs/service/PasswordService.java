@@ -7,8 +7,6 @@ import com.jiangwensi.mrbs.dto.TokenDto;
  */
 public interface PasswordService {
     TokenDto generateResetPasswordToken(String email, String returnUrl);
-
     boolean checkPasswordMatch(String email, String oldPassword);
-
     void removeResetPasswordToken(String email);
 }

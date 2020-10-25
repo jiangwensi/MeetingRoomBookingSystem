@@ -1,6 +1,8 @@
 package com.jiangwensi.mrbs.service;
 
-import com.jiangwensi.mrbs.dto.*;
+import com.jiangwensi.mrbs.dto.BookingDto;
+import com.jiangwensi.mrbs.dto.RoomDto;
+import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.*;
 import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
@@ -12,8 +14,7 @@ import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +22,6 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Jiang Wensi on 25/8/2020
@@ -31,35 +31,28 @@ import java.util.stream.Collectors;
 public class RoomServiceImpl implements RoomService {
 
     private RoomRepository roomRepo;
-
     private UserRepository userRepo;
-
     private OrgRepository orgRepo;
-
     private BlockTimeslotRepo blockTimeslotRepo;
-
-    private UserService userService;
-
     private BookingRepository bookingRepo;
 
-    OrgService orgService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private OrgService orgService;
 
-    public RoomServiceImpl(RoomRepository roomRepo, UserRepository userRepo, OrgRepository orgRepo, BlockTimeslotRepo blockTimeslotRepo, UserService userService, BookingRepository bookingRepo, OrgService orgService) {
+    public RoomServiceImpl(RoomRepository roomRepo, UserRepository userRepo, OrgRepository orgRepo, BlockTimeslotRepo blockTimeslotRepo, BookingRepository bookingRepo) {
         this.roomRepo = roomRepo;
         this.userRepo = userRepo;
         this.orgRepo = orgRepo;
         this.blockTimeslotRepo = blockTimeslotRepo;
-        this.userService = userService;
         this.bookingRepo = bookingRepo;
-        this.orgService = orgService;
     }
 
     @Override
     public List<RoomDto> searchRoom(String name, String orgName, Boolean active) {
-        log.info("searchRoom name:" + name + ",active:" + active);
 
         List<RoomDto> returnValue = new ArrayList<>();
-//        List<RoomEntity> roomEntities = roomRepo.searchRoom(name, active);
         List<RoomEntity> roomEntities = roomRepo.searchRoom(name, orgName, active);
 
         if (roomEntities == null) {
@@ -71,9 +64,10 @@ public class RoomServiceImpl implements RoomService {
         roomEntities
                 .stream()
                 .filter(e ->
-                        isOrgAdminAccessingRoom(e.getPublicId()) ||
-                                isRoomAdminAccessingRoom(e.getPublicId()) ||
-                                isUserAccessingRoom(e.getPublicId()))
+                        userService.isOrgAdminAccessingRoom(e.getPublicId()) ||
+                                userService.isRoomAdminAccessingRoom(e.getPublicId()) ||
+                                userService.isUserAccessingRoom(e.getPublicId()) ||
+                                userService.isSysadmAccessingRoom(e.getPublicId()))
                 .forEach(e -> {
                     RoomDto roomDto = new RoomDto();
                     mm.map(e, roomDto);
@@ -87,7 +81,10 @@ public class RoomServiceImpl implements RoomService {
     public RoomDto viewRoom(String publicId) {
         log.info("viewRoom publicId:" + publicId);
 
-        if (!isOrgAdminAccessingRoom(publicId) && !isRoomAdminAccessingRoom(publicId) && !isUserAccessingRoom(publicId)) {
+        if (!userService.isOrgAdminAccessingRoom(publicId)
+                && !userService.isRoomAdminAccessingRoom(publicId)
+                && !userService.isUserAccessingRoom(publicId)
+                && !userService.isSysadmAccessingRoom(publicId)) {
             throw new AccessDeniedException("You are not allowed to view room " + publicId);
         }
         RoomDto returnValue = new RoomDto();
@@ -186,13 +183,20 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public RoomDto updateRoom(String publicId, String name, Integer capacity, String facilities, String description,
-                              Boolean active,
-                              String organization,
-                              List<String> admins,
-                              List<String> users, List<BlockedTimeSlot> blockedTimeslots) {
-        log.info("updateRoom publicId:" + publicId + ",name:" + name + ",capacity:" + capacity + ",facilities:" + facilities + "," +
-                "description:" + description + ",active:" + active + ",admins:" + admins == null ? "" : String.join(" ", admins));
+    public RoomDto updateRoom(RoomRequest request) {
+        String publicId = request.getPublicId();
+        if (!userService.isAccessingMyRoomOrgAdmin(publicId)) {
+            throw new AccessDeniedException("You are not allowed to edit this room");
+        }
+        String name = request.getName();
+        Integer capacity = request.getCapacity();
+        String facilities = request.getFacilities();
+        String description = request.getDescription();
+        String organization = request.getOrgPublicId();
+        Boolean active = request.isActive();
+        List<String> admins = request.getAdmins();
+        List<String> users = request.getUsers();
+        List<BlockedTimeSlot> blockedTimeslots = request.getBlockedTimeslots();
 
         RoomEntity roomEntity = roomRepo.findByPublicId(publicId);
 
@@ -279,7 +283,11 @@ public class RoomServiceImpl implements RoomService {
     public void deleteRoom(String publicId) {
         log.info("deleteRoom publicId:" + publicId);
 
-        bookingRepo.deleteBookingByRoom(publicId);
+        if (!userService.isAccessingMyRoomOrgAdmin(publicId)) {
+            throw new AccessDeniedException("You are not allowed to delete this room id:" + publicId);
+        }
+
+        bookingRepo.deleteBookingByRoomPublicId(publicId);
 
         RoomEntity roomEntity = roomRepo.findByPublicId(publicId);
         if (roomEntity == null) {
@@ -296,6 +304,10 @@ public class RoomServiceImpl implements RoomService {
     public List<UserDto> enrollUser(String roomPublicId, List<String> users) {
         log.info("enrollUser roomPublicId:" + roomPublicId + ",users:" + users == null ? null : String.join(" ", users));
 
+
+        if (!userService.isOrgAdminAccessingRoom(roomPublicId) && !userService.isRoomAdminAccessingRoom(roomPublicId)) {
+            throw new AccessDeniedException("You are not allowed to enroll user for this room");
+        }
         RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
         if (roomEntity == null) {
             throw new NotFoundException("Unable to find room by id:" + roomPublicId);
@@ -321,6 +333,10 @@ public class RoomServiceImpl implements RoomService {
     public List<UserDto> unenrollUser(String roomPublicId, List<String> users) {
         log.info("unenrollUser roomPublicId:" + roomPublicId + ",users:" + users == null ? null : String.join(" ", users));
 
+
+        if (!userService.isOrgAdminAccessingRoom(roomPublicId) && !userService.isRoomAdminAccessingRoom(roomPublicId)) {
+            throw new AccessDeniedException("You are not allowed to enroll user for this room");
+        }
         RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
         if (roomEntity == null) {
             throw new NotFoundException("Unable to find room by id:" + roomPublicId);
@@ -345,6 +361,10 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public List<UserDto> listEnrolledUsers(String roomId) {
         log.info("listEnrolledUsers roomId:" + roomId);
+
+        if (!userService.isOrgAdminAccessingRoom(roomId) && !userService.isRoomAdminAccessingRoom(roomId)) {
+            throw new AccessDeniedException("You are not allowed to enroll user for this room");
+        }
 
         List<UserDto> returnValue = new ArrayList<>();
 
@@ -437,85 +457,6 @@ public class RoomServiceImpl implements RoomService {
         return retrunValue;
     }
 
-    @Override
-    public List<AvailableTimeslotDto> listAvailableTimeslots(String roomPublicId, String date) {
-        //TODO
-        //Apply procedure here
-        return null;
-    }
-
-
-    @Override
-    public boolean isAccessingMyOrg(String orgPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
-        if (isAdminOfOrganizations != null) {
-            return isAdminOfOrganizations.contains(orgPublicId);
-        }
-        return false;
-    }
-
-
-    @Override
-    public boolean isAccessingMyRoomOrgAdmin(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        RoomDto roomDto = viewRoom(roomPublicId);
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-        OrganizationDto organizationDto = orgService.viewOrganization(roomDto.getOrganization());
-
-        List<String> orgAdmins = organizationDto.getAdmins();
-        for (String admin : orgAdmins) {
-            if (userDto.getPublicId().equals(admin)) {
-                log.info("isAccessingMyRoomOrgAdmin=true");
-                return true;
-            }
-        }
-        log.info("isAccessingMyRoomOrgAdmin=false");
-        return false;
-    }
-
-    @Override
-    public boolean isOrgAdminAccessingRoom(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-
-        List<String> roomsInMyOrganizations = new ArrayList<>();
-        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
-        if (isAdminOfOrganizations != null) {
-            List<OrganizationDto> organizationDtos =
-                    isAdminOfOrganizations.stream().map(e -> orgService.viewOrganization(e)).collect(Collectors.toList());
-            if (organizationDtos != null) {
-                organizationDtos.forEach(e -> roomsInMyOrganizations.addAll(e.getRooms()));
-            }
-        }
-
-        return roomsInMyOrganizations.contains(roomPublicId);
-    }
-
-    @Override
-    public boolean isRoomAdminAccessingRoom(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = userService.findUserByEmail(auth.getName());
-        List<String> isAdminOfRooms = userDto.getIsAdminOfRooms();
-        if (isAdminOfRooms != null) {
-            return isAdminOfRooms.contains(roomPublicId);
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isUserAccessingRoom(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
-        List<UserEntity> userEntitys =
-                roomEntity.getUsers().stream().filter(e->e.getEmail().equalsIgnoreCase(auth.getName())).collect(Collectors.toList());
-        if(userEntitys!=null && userEntitys.size()==1){
-            return true;
-        }
-        return false;
-    }
 }
 
 

@@ -14,7 +14,6 @@ import com.jiangwensi.mrbs.exception.NotFoundException;
 import com.jiangwensi.mrbs.repo.TokenRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,18 +24,22 @@ import java.util.List;
 @Service
 public class SESServiceImpl implements SESService {
 
-    @Autowired
     UserRepository userRepository;
-    @Autowired
     TokenRepository tokenRepository;
-
-    @Autowired
     AppProperties appProperties;
+
+
 
     private String from;
 
     public SESServiceImpl() {
 
+    }
+
+    public SESServiceImpl(UserRepository userRepository, TokenRepository tokenRepository, AppProperties appProperties) {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
+        this.appProperties = appProperties;
     }
 
     @Override

@@ -1,26 +1,20 @@
 package com.jiangwensi.mrbs.service;
 
 import com.jiangwensi.mrbs.AppProperties;
-import com.jiangwensi.mrbs.dto.RoleDto;
 import com.jiangwensi.mrbs.dto.UserDto;
-import com.jiangwensi.mrbs.entity.RoleEntity;
-import com.jiangwensi.mrbs.entity.TokenEntity;
-import com.jiangwensi.mrbs.entity.UserEntity;
+import com.jiangwensi.mrbs.entity.*;
 import com.jiangwensi.mrbs.enumeration.RoleName;
 import com.jiangwensi.mrbs.enumeration.TokenType;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
-import com.jiangwensi.mrbs.repo.RoleRepository;
-import com.jiangwensi.mrbs.repo.TokenRepository;
-import com.jiangwensi.mrbs.repo.UserRepository;
+import com.jiangwensi.mrbs.model.request.user.UpdateUserRequest;
+import com.jiangwensi.mrbs.repo.*;
 import com.jiangwensi.mrbs.security.UserPrincipal;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
 import com.jiangwensi.mrbs.utils.TokenUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -36,42 +30,43 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Created by Jiang Wensi on 16/8/2020
  */
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private TokenRepository tokenRepository;
-
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
     private RoleRepository roleRepository;
-
-    @Autowired
+    private OrgRepository orgRepository;
+    private RoomRepository roomRepo;
     private BCryptPasswordEncoder encoder;
+    private BookingRepository bookingRepository;
 
     @Autowired
     private RoleService roleService;
-
     @Autowired
     private TokenService tokenService;
-
     @Autowired
-    private SESService SESService;
+    private UserService userService;
 
-    Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    public UserServiceImpl(UserRepository userRepository, TokenRepository tokenRepository, RoleRepository roleRepository, OrgRepository orgRepository, RoomRepository roomRepo, BCryptPasswordEncoder encoder, BookingRepository bookingRepository) {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
+        this.roleRepository = roleRepository;
+        this.orgRepository = orgRepository;
+        this.roomRepo = roomRepo;
+        this.encoder = encoder;
+        this.bookingRepository = bookingRepository;
+    }
 
     @Override
     public UserDto findUserByEmail(String email) {
+
         UserEntity userEntity = userRepository.findByEmail(email);
         if (userEntity == null) {
             return null;
@@ -104,8 +99,7 @@ public class UserServiceImpl implements UserService {
         tokenEntity.setReturnUrl(returnUrl);
 
         userEntity.getTokens().add(tokenEntity);
-        UserEntity savedUserEntity = userRepository.save(userEntity);
-//        UserDto returnValue = new ModelMapper().map(savedUserEntity, UserDto.class);
+        userRepository.save(userEntity);
         UserDto returnValue = new UserDto();
         MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity,returnValue);
         roleEntity.getUsers().add(userEntity);
@@ -136,7 +130,6 @@ public class UserServiceImpl implements UserService {
         tokenEntities.add(tokenEntity);
 
         UserEntity savedUserEntity = userRepository.save(userEntity);
-//        UserDto returnValue = new ModelMapper().map(savedUserEntity, UserDto.class);
         UserDto returnValue = new UserDto();
         MyModelMapper.userEntityToUserDtoModelMapper().map(savedUserEntity, returnValue);
         return returnValue;
@@ -171,7 +164,6 @@ public class UserServiceImpl implements UserService {
         List<UserEntity> userEntities = new ArrayList<>();
         boolean nameEmpty = MyStringUtils.isEmpty(name);
         boolean emailEmpty = MyStringUtils.isEmpty(email);
-        boolean roleEmpty = (role == null || role.size() == 0) ? true : false;
 
         if (role == null || role.size() == 0) {
             role = new ArrayList<>();
@@ -205,10 +197,8 @@ public class UserServiceImpl implements UserService {
 
             userEntities = userRepository.search(role, active, verified);
 
-//            userEntities = IteratorUtils.toList(userRepository.findAll().iterator());
 
         }
-//        List<UserEntity> userEntities = userRepository.search(name);
         List<UserDto> returnValue = new ArrayList<>();
 
 
@@ -234,7 +224,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(String publicId) {
-        logger.info("deleteUser publicId:" + publicId);
+        log.info("deleteUser publicId:" + publicId);
         UserEntity userEntity = userRepository.findByPublicId(publicId);
         if (userEntity == null) {
             throw new NotFoundException("Unable to find user");
@@ -246,41 +236,23 @@ public class UserServiceImpl implements UserService {
             roleRepository.save(roleEntity);
         }
 
-//        List<TokenEntity> tokenEntities = userEntity.getTokens();
-////        tokenRepository.deleteAll(tokenEntities);
-
         userRepository.delete(userEntity);
     }
 
-    //TODO to allow editing more fields in future
-    @Override
-    public UserDto editProfile(String publicId, String name) {
-        logger.info("editProfile publicId:" + publicId + ", name=" + name);
-        UserEntity userEntity = userRepository.findByPublicId(publicId);
-        if (!MyStringUtils.isEmpty(name)) {
-            userEntity.setName(name);
-        }
-        userEntity = userRepository.save(userEntity);
-        UserDto returnValue = new ModelMapper().map(userEntity, UserDto.class);
-//        MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity, returnValue);
-
-        return returnValue;
-    }
 
     @Override
     @Transactional
-    public void updateUser(String publicId, String name, List<String> roles, Boolean active) {
-
-        UserEntity userEntity = userRepository.findByPublicId(publicId);
+    public void updateUser(UpdateUserRequest request) {
+        UserEntity userEntity = userRepository.findByPublicId(request.getPublicId());
         if (userEntity == null) {
-            throw new NotFoundException("Unable to find user by id:" + publicId);
+            throw new NotFoundException("Unable to find user by id:" + request.getPublicId());
         }
-        userEntity.setName(name);
-        userEntity.setActive(active);
+        userEntity.setName(request.getName());
+        userEntity.setActive(request.getActive());
 
         List<RoleEntity> oldRoleEntities = userEntity.getRoles();
         List<RoleEntity> newRoleEntities = new ArrayList<>();
-        for (String str : roles) {
+        for (String str :  request.getRoles()) {
             RoleEntity re = roleRepository.findByName(str);
             if (re == null) {
                 throw new InvalidInputException("Wrong role:" + str);
@@ -311,17 +283,6 @@ public class UserServiceImpl implements UserService {
                 throw new InvalidInputException("changeEmailReturnUrl is not set to validate updated email");
             }
 
-            //remove existing verify email token
-//            List<TokenEntity> tokenEntities =
-//                    userEntity.getTokens().stream().filter(e->!e.getType().equals(TokenType.VERIFY_EMAIL)).collect(Collectors.toList());
-//            TokenEntity existingToken = tokenRepository.findByUserIdAndType(userEntity.getId(),
-//                    TokenType.VERIFY_EMAIL.name());
-//            if(existingToken!=null) {
-//                tokenRepository.delete(existingToken);
-//                userEntity.getTokens().remove(existingToken);
-//                userRepository.save(userEntity);
-//            }
-
             tokenService.deleteObsoleteTokenVerifyEmail(publicId);
             tokenService.generateVerifyUpdatedEmailToken(email, changeEmailReturnUrl, publicId);
 
@@ -339,48 +300,6 @@ public class UserServiceImpl implements UserService {
 
     }
 
-
-    @Override
-    @Transactional
-    public void changeUserStatus(String publicId, boolean active) {
-        UserEntity userEntity = userRepository.findByPublicId(publicId);
-        userEntity.setActive(active);
-        userRepository.save(userEntity);
-//        userRepository.changeUserStatus(publicId,active);
-//        UserDto returnValue = new UserDto();
-//        return;
-    }
-
-    @Override
-    @Transactional
-    public List<RoleDto> changeUserRoles(String publicId, List<String> changeRoles) {
-        UserEntity userEntity = userRepository.findByPublicId(publicId);
-
-        List<RoleEntity> oldRoleEntities = userEntity.getRoles();
-        List<RoleEntity> newRoleEntities = new ArrayList<>();
-
-        for (String str : changeRoles) {
-            newRoleEntities.add(roleRepository.findByName(str));
-        }
-
-        oldRoleEntities.forEach(oldRoleEntity -> {
-            oldRoleEntity.getUsers().remove(userEntity);
-            roleRepository.save(oldRoleEntity);
-        });
-
-        newRoleEntities.forEach(newRoleEntity -> {
-            newRoleEntity.getUsers().add(userEntity);
-            roleRepository.save(newRoleEntity);
-        });
-
-        List<RoleDto> returnValue = new ArrayList<>();
-        returnValue = new ModelMapper().map(newRoleEntities, new TypeToken<List<RoleDto>>() {
-        }.getType());
-
-        return returnValue;
-    }
-
-
     @Override
     public UserDto emailVerified(String email) {
         UserEntity userEntity = userRepository.findByEmail(email);
@@ -391,7 +310,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        logger.debug("loadUserByUsername is called. email: " + email);
+        log.debug("loadUserByUsername is called. email: " + email);
         UserEntity userEntity = userRepository.findByEmail(email);
         if (userEntity == null) {
             return null;
@@ -413,16 +332,174 @@ public class UserServiceImpl implements UserService {
     }
 
 
+
+    @Override
+    public boolean hasAuthorizedRoleOrAccessingMyOrganization(String authorizedRole, String orgPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        List<GrantedAuthority> grantedAuthorities = (List<GrantedAuthority>) auth.getAuthorities();
+        for(GrantedAuthority ga: grantedAuthorities){
+            if(ga.getAuthority().equals(authorizedRole)){
+                return true;
+            }
+        }
+
+        List<String> admins = orgRepository.findByPublicId(orgPublicId).getAdmins().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        UserDto userDto = findUserByEmail(auth.getName());
+        for(String admin: admins){
+            if(userDto.getPublicId().equals(admin)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isAccessedByRoomUser(String roomId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = findUserByEmail(auth.getName());
+
+        List<String> roomUsers = roomRepo.findByPublicId(roomId).getUsers().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        if (roomUsers != null && roomUsers.size() > 0) {
+            for (String roomUser : roomUsers) {
+                if (roomUser.equals(userDto.getPublicId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isAccessedByTargetRole(String role) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = findUserByEmail(auth.getName());
+        List<String> roles = userDto.getRoles();
+        if (roles != null && roles.size() > 0) {
+            for (String e : roles) {
+                if (e.equals(role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isAccessedByRoomAdmin(String bookingPublicId) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = findUserByEmail(auth.getName());
+        BookingEntity bookingEntity = bookingRepository.findByPublicId(bookingPublicId);
+        RoomEntity roomEntity = roomRepo.findByPublicId(bookingEntity.getRoom().getPublicId());
+        List<String> roomAdms = roomEntity.getAdmins().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        if (roomAdms != null && roomAdms.size() > 0) {
+            for (String roomAdm : roomAdms) {
+                if (roomAdm.equals(userDto.getPublicId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isAccessingMyBooking(String bookingId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserEntity userEntity = userRepository.findByEmail(auth.getName());
+        BookingEntity bookingEntity = bookingRepository.findByPublicId(bookingId);
+        if (userEntity.getId()==bookingEntity.getBookedBy().getId()) {
+            return true;
+        }
+        return false;
+    }
+
+
+
+
     @Override
     public boolean isAccessingMyOrg(String orgPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = findUserByEmail(auth.getName());
-        List<String> isAdminOfOrganizations = userDto.getIsAdminOfOrganizations();
+        List<String> isAdminOfOrganizations =
+                userRepository.findByEmail(auth.getName()).getIsAdminOfOrganizations().stream().map(e->e.getPublicId()).collect(Collectors.toList());
         if (isAdminOfOrganizations != null) {
             return isAdminOfOrganizations.contains(orgPublicId);
         }
         return false;
     }
 
+
+    @Override
+    public boolean isAccessingMyRoomOrgAdmin(String roomPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
+        UserEntity userEntity = userRepository.findByEmail(auth.getName());
+        OrganizationEntity orgEntity = orgRepository.findByPublicId(roomEntity.getOrganization().getPublicId());
+
+        List<String> orgAdmins = orgEntity.getAdmins().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        for (String admin : orgAdmins) {
+            if (userEntity.getPublicId().equals(admin)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isOrgAdminAccessingRoom(String roomPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserEntity userEntity = userRepository.findByEmail(auth.getName());
+
+        List<String> roomsInMyOrganizations = new ArrayList<>();
+        List<String> isAdminOfOrganizations = userEntity.getIsAdminOfOrganizations().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        if (isAdminOfOrganizations != null) {
+            List<OrganizationEntity> organizationEntities =
+                    isAdminOfOrganizations.stream().map(e->orgRepository.findByPublicId(e)).collect(Collectors.toList());
+            if (organizationEntities != null) {
+                organizationEntities.forEach(e -> roomsInMyOrganizations.addAll(e.getRooms().stream().map(r->r.getPublicId()).collect(Collectors.toList())));
+            }
+        }
+
+        return roomsInMyOrganizations.contains(roomPublicId);
+    }
+
+    @Override
+    public boolean isRoomAdminAccessingRoom(String roomPublicId) {
+        UserDto userDto = getUserDto();
+        List<String> isAdminOfRooms = userDto.getIsAdminOfRooms();
+        if (isAdminOfRooms != null) {
+            return isAdminOfRooms.contains(roomPublicId);
+        }
+        return false;
+    }
+
+    public UserDto getUserDto() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return findUserByEmail(auth.getName());
+    }
+
+    @Override
+    public boolean isUserAccessingRoom(String roomPublicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
+        List<UserEntity> userEntitys =
+                roomEntity.getUsers().stream().filter(e -> e.getEmail().equalsIgnoreCase(auth.getName())).collect(Collectors.toList());
+        if (userEntitys != null && userEntitys.size() == 1) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isSysadmAccessingRoom(String publicId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            if(authority.getAuthority().equalsIgnoreCase("SYSADM")){
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 public interface RoomRepository extends CrudRepository<RoomEntity,Long> {
@@ -27,4 +28,10 @@ public interface RoomRepository extends CrudRepository<RoomEntity,Long> {
             value = "select r.* from room r join org o on r.org_id = o.id and o.public_id = :orgPublicId and r.name =" +
                     " :roomName")
     RoomEntity findByRoomNameAndOrgPublicId(@Param("roomName") String roomName, @Param("orgPublicId") String orgPublicId);
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Query(nativeQuery = true,
+    value = "delete from room where org_id in (select id from org where id = :orgId )")
+    void deleteByOrgId(@Param("orgId") Long orgId);
+
 }

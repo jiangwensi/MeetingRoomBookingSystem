@@ -5,7 +5,6 @@ import com.jiangwensi.mrbs.constant.PathConst;
 import com.jiangwensi.mrbs.model.response.RoleResponse;
 import com.jiangwensi.mrbs.service.RoleService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +23,11 @@ import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @Scope("request")
 public class RoleController {
-    @Autowired
     private RoleService roleService;
+
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
+    }
 
     @GetMapping
     public RoleResponse listRoles(){

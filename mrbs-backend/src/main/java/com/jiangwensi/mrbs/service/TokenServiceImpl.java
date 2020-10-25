@@ -11,9 +11,7 @@ import com.jiangwensi.mrbs.exception.UnknownErrorException;
 import com.jiangwensi.mrbs.repo.TokenRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
 import com.jiangwensi.mrbs.utils.TokenUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,14 +20,16 @@ import javax.transaction.Transactional;
  * Created by Jiang Wensi on 17/8/2020
  */
 @Service
+@Slf4j
 public class TokenServiceImpl implements TokenService {
 
-    @Autowired
     TokenRepository tokenRepository;
-    @Autowired
     UserRepository userRepository;
 
-    Logger logger = LoggerFactory.getLogger(TokenServiceImpl.class);
+    public TokenServiceImpl(TokenRepository tokenRepository, UserRepository userRepository) {
+        this.tokenRepository = tokenRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public VerifyEmailTokenDto verifyToken(String token) {
@@ -37,13 +37,13 @@ public class TokenServiceImpl implements TokenService {
         TokenEntity tokenEntity = tokenRepository.findByToken(token);
 
         if (tokenEntity == null) {
-            logger.error("unable to find token " + token);
+            log.error("unable to find token " + token);
             throw new InvalidInputException("Token is invalid or this email has already been verified.");
         }
 
         UserEntity userEntity = tokenEntity.getUser();
         if (userEntity == null) {
-            logger.error("unable to find userEntity from token " + token);
+            log.error("unable to find userEntity from token " + token);
             throw new UnknownErrorException("Token is invalid");
         }
 
@@ -75,12 +75,6 @@ public class TokenServiceImpl implements TokenService {
         tokenRepository.deleteByToken(token);
     }
 
-    //TODO
-    @Override
-    public TokenDto findTokenByUserEmailAndType(String myEmail, String tokenType) {
-//        TokenEntity tokenEntity = tokenRepository.findByEmailAndType();
-        return null;
-    }
 
 
     @Override

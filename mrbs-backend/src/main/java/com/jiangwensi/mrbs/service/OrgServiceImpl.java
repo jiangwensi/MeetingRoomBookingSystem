@@ -6,7 +6,11 @@ import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.OrganizationEntity;
 import com.jiangwensi.mrbs.entity.RoomEntity;
 import com.jiangwensi.mrbs.entity.UserEntity;
+import com.jiangwensi.mrbs.enumeration.RoleName;
+import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
+import com.jiangwensi.mrbs.model.request.org.OrganizationRequest;
+import com.jiangwensi.mrbs.repo.BookingRepository;
 import com.jiangwensi.mrbs.repo.OrgRepository;
 import com.jiangwensi.mrbs.repo.RoomRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
@@ -28,13 +32,19 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class OrgServiceImpl implements OrgService {
-    @Autowired
     private OrgRepository organizationRepository;
-
-    @Autowired
+    private BookingRepository bookingRepos;
     private UserRepository userRepository;
-    @Autowired
     private RoomRepository roomRepository;
+    @Autowired
+    private UserService userService;
+
+    public OrgServiceImpl(OrgRepository organizationRepository, BookingRepository bookingRepos, UserRepository userRepository, RoomRepository roomRepository) {
+        this.organizationRepository = organizationRepository;
+        this.bookingRepos = bookingRepos;
+        this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
+    }
 
     @Override
     public List<OrganizationDto> search(String name, Boolean active) {
@@ -68,6 +78,11 @@ public class OrgServiceImpl implements OrgService {
     @Override
     public OrganizationDto viewOrganization(String publicId) {
 
+
+        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),publicId)){
+            throw new AccessDeniedException("You are not allowed to view organization "+publicId);
+        };
+
         OrganizationEntity organizationEntity = organizationRepository.findByPublicId(publicId);
         if (organizationEntity == null) {
             throw new NotFoundException("Unable to find organization id:" + publicId);
@@ -81,7 +96,12 @@ public class OrgServiceImpl implements OrgService {
 
     @Override
     @Transactional
-    public OrganizationDto create(String name, String description, Boolean active, List<String> admins) {
+    public OrganizationDto create(OrganizationRequest request) {
+
+        String name = request.getName();
+        String description = request.getDescription();
+        Boolean active = request.isActive();
+        List<String> admins = request.getAdmins();
 
         OrganizationEntity organizationEntity = new OrganizationEntity(UUID.randomUUID().toString());
         organizationEntity.setActive(active);
@@ -111,8 +131,14 @@ public class OrgServiceImpl implements OrgService {
     }
 
     @Override
-    public OrganizationDto update(String publicId, String name, String description, Boolean active,
-                                  List<String> admins) {
+    public OrganizationDto update(OrganizationRequest request) {
+
+        String publicId = request.getPublicId();
+        String name = request.getName();
+        String description = request.getDescription();
+        Boolean active = request.isActive();
+        List<String> admins = request.getAdmins();
+
         OrganizationEntity organizationEntity = organizationRepository.findByPublicId(publicId);
         if (organizationEntity == null) {
             throw new NotFoundException("Unable to find organization by id:" + publicId);
@@ -158,11 +184,21 @@ public class OrgServiceImpl implements OrgService {
         if (organizationEntity == null) {
             throw new NotFoundException("Unable to find organization by id:" + publicId);
         }
+        organizationEntity
+                .getRooms()
+                .stream()
+                .map(r->r.getId())
+                .forEach(r->bookingRepos.deleteByRoomId(r));
+        roomRepository.deleteByOrgId(organizationEntity.getId());
         organizationRepository.deleteByPublicId(publicId);
     }
 
     @Override
     public List<UserDto> listAdminByOrg(String orgPublicId) {
+
+        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),orgPublicId)){
+            throw new AccessDeniedException("You are not allowed to view organization "+orgPublicId);
+        };
         List<UserDto> returnValue = new ArrayList<>();
         List<UserEntity> userEntities = organizationRepository.findByPublicId(orgPublicId).getAdmins();
         if (userEntities != null && userEntities.size() > 0) {
@@ -177,6 +213,10 @@ public class OrgServiceImpl implements OrgService {
 
     @Override
     public List<RoomDto> listRoomsByOrg(String orgPublicId) {
+
+        if(!userService.hasAuthorizedRoleOrAccessingMyOrganization(RoleName.SYSADM.getName(),orgPublicId)){
+            throw new AccessDeniedException("You are not allowed to view organization "+orgPublicId);
+        };
         List<RoomDto> returnValue = new ArrayList<>();
         List<RoomEntity> roomEntities = organizationRepository.findByPublicId(orgPublicId).getRooms();
         if (roomEntities != null && roomEntities.size() > 0) {

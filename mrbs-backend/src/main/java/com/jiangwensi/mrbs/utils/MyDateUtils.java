@@ -14,8 +14,6 @@ import java.util.Date;
 public class MyDateUtils {
 
     public static boolean isValidFormat(String value){
-        String dateformat = AppProperties.getAppProperties().getProperty("dateformat");
-        String timeformat = AppProperties.getAppProperties().getProperty("timeformat");
 
         SimpleDateFormat sdf = new SimpleDateFormat(getDefaultDateFormat());
         try {

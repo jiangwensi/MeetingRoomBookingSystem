@@ -51,8 +51,6 @@ public class AuthController {
 
     @PostMapping(path="signUp",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public SignUpResponse signUp(@RequestBody SignUpRequest request) {
-        logger.debug("signUp() is called");
-
         String name = request.getName();
         String email = MyStringUtils.toUpperCaseAndTrim(request.getEmail());
         String password = request.getPassword();
@@ -66,7 +64,6 @@ public class AuthController {
             }
         };
         mapper.addMappings(map);
-
 
         UserDto userDto = userService.findUserByEmail(email);
         if (userDto != null) {
@@ -90,7 +87,6 @@ public class AuthController {
 
     @GetMapping(path = "/verifyEmail")
     public VerifyEmailResponse verify(@RequestParam("token") String token) {
-        logger.debug("verify is called");
         VerifyEmailTokenDto verifyTokenDto = tokenService.verifyToken(token);
         userService.emailVerified(verifyTokenDto.getEmail());
         VerifyEmailResponse returnValue = new ModelMapper().map(verifyTokenDto, VerifyEmailResponse.class);
@@ -99,12 +95,10 @@ public class AuthController {
 
     @PostMapping(path = "/requestResetForgottenPassword")
     public GeneralResponse requestResetForgottenPassword(@RequestBody RequestResetForgottenPasswordRequest request) {
-        logger.debug("requestResetForgottenPassword is called");
         String email = MyStringUtils.toUpperCaseAndTrim(request.getEmail());
 
         GeneralResponse returnValue = new GeneralResponse();
         UserDto userDto = userService.findUserByEmail(email);
-//        passwordService.removeResetPasswordToken(email);
         TokenDto tokenDto = passwordService.generateResetPasswordToken(email, request.getReturnUrl());
         SESService.sendResetForgottenPasswordTokenEmail(userDto, tokenDto);
         //email token
@@ -116,7 +110,6 @@ public class AuthController {
 
     @PostMapping(path = "/resetForgottenPassword")
     public GeneralResponse resetForgottenPassword(@RequestBody ResetForgottenPasswordRequest request) {
-        logger.debug("resetForgottenPassword is called");
         GeneralResponse returnValue = new GeneralResponse();
 
         String email = request.getEmail();
@@ -147,16 +140,13 @@ public class AuthController {
             tokenService.removeToken(token);
         }
 
-        UserDto userDto = userService.updatePassword(email,password);
         returnValue.setMessage("Password is reset successfully");
         returnValue.setStatus("success");
-        logger.info("Password is reset for user "+email);
         return returnValue;
     }
 
     @PostMapping(path = "/resetPassword")
     public GeneralResponse resetPassword(@RequestBody ResetPasswordRequest request) {
-        logger.debug("resetPassword is called");
         GeneralResponse returnValue = new GeneralResponse();
 
         String email = MyStringUtils.toUpperCaseAndTrim(request.getEmail());

@@ -1,6 +1,5 @@
 package com.jiangwensi.mrbs.service;
 
-import com.jiangwensi.mrbs.dto.TokenDto;
 import com.jiangwensi.mrbs.dto.VerifyEmailTokenDto;
 
 import javax.transaction.Transactional;
@@ -15,8 +14,6 @@ public interface TokenService {
     boolean tokenExists(String token);
 
     void removeToken(String token);
-
-    TokenDto findTokenByUserEmailAndType(String myEmail, String name);
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     void deleteObsoleteTokenVerifyEmail(String userPublicId);

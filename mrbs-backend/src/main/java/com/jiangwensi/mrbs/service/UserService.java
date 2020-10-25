@@ -1,8 +1,8 @@
 package com.jiangwensi.mrbs.service;
 
-import com.jiangwensi.mrbs.dto.RoleDto;
 import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.TokenEntity;
+import com.jiangwensi.mrbs.model.request.user.UpdateUserRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
@@ -20,11 +20,6 @@ public interface UserService extends UserDetailsService {
 
     UserDto updatePassword(String email, String password);
 
-//    List<UserDto> search(String name, String email, List<String> role);
-
-    void changeUserStatus(String publicId, boolean active);
-
-    List<RoleDto> changeUserRoles(String publicId, List<String> changeRoles);
 
     List<UserDto> search(String name, String email, List<String> role, List<Boolean> active,
                          List<Boolean> verified);
@@ -33,11 +28,29 @@ public interface UserService extends UserDetailsService {
 
     void deleteUser(String publicId);
 
-    UserDto editProfile(String publicId, String name);
-
-    void updateUser(String publicId, String name, List<String> changeRoles, Boolean active);
+    void updateUser(UpdateUserRequest request);
 
     UserDto updateMyProfile(String publicId, String name, String email, String changeEmailReturnUrl);
 
     boolean isAccessingMyOrg(String orgPublicId);
+
+    boolean hasAuthorizedRoleOrAccessingMyOrganization(String authorizedRole, String orgPublicId);
+
+    boolean isAccessedByRoomUser(String roomId);
+
+    boolean isAccessedByTargetRole(String role);
+
+    boolean isAccessedByRoomAdmin(String roomId);
+
+    boolean isAccessingMyBooking(String bookingId);
+
+    boolean isAccessingMyRoomOrgAdmin(String roomPublicId);
+
+    boolean isOrgAdminAccessingRoom(String roomPublicId);
+
+    boolean isRoomAdminAccessingRoom(String roomPublicId);
+
+    boolean isUserAccessingRoom(String roomPublicId);
+
+    boolean isSysadmAccessingRoom(String publicId);
 }

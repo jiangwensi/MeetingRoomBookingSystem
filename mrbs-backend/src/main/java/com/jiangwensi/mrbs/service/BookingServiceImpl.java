@@ -8,8 +8,10 @@ import com.jiangwensi.mrbs.entity.BookingEntity;
 import com.jiangwensi.mrbs.entity.RoomEntity;
 import com.jiangwensi.mrbs.entity.Slot;
 import com.jiangwensi.mrbs.entity.UserEntity;
+import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
+import com.jiangwensi.mrbs.model.request.booking.BookingRequest;
 import com.jiangwensi.mrbs.repo.BookingRepository;
 import com.jiangwensi.mrbs.repo.RoomRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
@@ -48,29 +50,38 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDto createBooking(String bookedBy, String roomId, String from, String to) throws ParseException {
+    public BookingDto createBooking(BookingRequest request) throws ParseException {
+
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDto userDto = userService.findUserByEmail(auth.getName());
+
+        if (!userService.isAccessedByRoomUser(request.getRoomId()) && !userService.isAccessedByTargetRole("SYSADM")) {
+            throw new AccessDeniedException("You are not allowed to book this room:" + request.getRoomId());
+        }
+
         String timeformat = getTimeFormat();
 
-        UserEntity userEntity = userRepository.findByPublicId(bookedBy);
+        UserEntity userEntity = userRepository.findByPublicId(userDto.getPublicId());
         if (userEntity == null) {
-            throw new NotFoundException("Unable to find user by id:" + bookedBy);
+            throw new NotFoundException("Unable to find user by id:" + userDto.getPublicId());
         }
 
-        RoomEntity roomEntity = roomRepository.findByPublicId(roomId);
+        RoomEntity roomEntity = roomRepository.findByPublicId(request.getRoomId());
         if (roomEntity == null) {
-            throw new NotFoundException("Unable to find room by id:" + roomId);
+            throw new NotFoundException("Unable to find room by id:" + request.getRoomId());
         }
 
-        if (clash(roomId, from, to)) {
-            throw new InvalidInputException("The time slot is not available. roomId:" + roomId + ",from:" + from + ",to:" + to);
+        if (clash(request.getRoomId(), request.getFromTime(), request.getToTime())) {
+            throw new InvalidInputException("The time slot is not available. roomId:" + request.getRoomId() + ",from:" + request.getFromTime() + ",to:" + request.getToTime());
         }
 
         BookingEntity bookingEntity = new BookingEntity();
         bookingEntity.setBookedBy(userEntity);
         bookingEntity.setRoom(roomEntity);
-        bookingEntity.setDate(new SimpleDateFormat(timeformat).parse(from));
-        bookingEntity.setFromTime(new SimpleDateFormat(timeformat).parse(from));
-        bookingEntity.setToTime(new SimpleDateFormat(timeformat).parse(to));
+        bookingEntity.setDate(new SimpleDateFormat(timeformat).parse(request.getFromTime()));
+        bookingEntity.setFromTime(new SimpleDateFormat(timeformat).parse(request.getFromTime()));
+        bookingEntity.setToTime(new SimpleDateFormat(timeformat).parse(request.getToTime()));
         bookingEntity.setPublicId(UUID.randomUUID().toString());
         bookingEntity = bookingRepo.save(bookingEntity);
 
@@ -81,20 +92,26 @@ public class BookingServiceImpl implements BookingService {
 
 
     @Override
-    public BookingDto updateBooking(String publicId, String room, String fromTime, String toTime) throws ParseException {
-        BookingEntity bookingEntity = bookingRepo.findByPublicId(publicId);
-        if (bookingEntity == null) {
-            throw new NotFoundException("Unable to find booking id:" + publicId);
+    public BookingDto updateBooking(BookingRequest request) throws ParseException {
+
+        if (!userService.isAccessingMyBooking(request.getPublicId())
+                && !userService.isAccessedByRoomAdmin(request.getPublicId())) {
+            throw new AccessDeniedException("You are not allowed to update this booking:" + request.getPublicId());
         }
-        if (!MyStringUtils.isEmpty(room)) {
-            RoomEntity roomEntity = roomRepository.findByPublicId(room);
+
+        BookingEntity bookingEntity = bookingRepo.findByPublicId(request.getPublicId());
+        if (bookingEntity == null) {
+            throw new NotFoundException("Unable to find booking id:" + request.getPublicId());
+        }
+        if (!MyStringUtils.isEmpty(request.getRoomId())) {
+            RoomEntity roomEntity = roomRepository.findByPublicId(request.getRoomId());
             bookingEntity.setRoom(roomEntity);
         }
-        if (!MyStringUtils.isEmpty(fromTime)) {
-            bookingEntity.setFromTime(new SimpleDateFormat(getTimeFormat()).parse(fromTime));
+        if (!MyStringUtils.isEmpty(request.getFromTime())) {
+            bookingEntity.setFromTime(new SimpleDateFormat(getTimeFormat()).parse(request.getFromTime()));
         }
-        if (!MyStringUtils.isEmpty(toTime)) {
-            bookingEntity.setToTime(new SimpleDateFormat(getTimeFormat()).parse(toTime));
+        if (!MyStringUtils.isEmpty(request.getToTime())) {
+            bookingEntity.setToTime(new SimpleDateFormat(getTimeFormat()).parse(request.getToTime()));
         }
         bookingEntity = bookingRepo.save(bookingEntity);
         BookingDto returnValue = new BookingDto();
@@ -104,6 +121,14 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto viewBooking(String bookingId) {
+
+        if (!userService.isAccessingMyBooking(bookingId)
+                && !userService.isAccessedByRoomAdmin(bookingId)
+        ) {
+
+            throw new AccessDeniedException("You are not allowed to view this booking:" + bookingId);
+
+        }
         BookingEntity bookingEntity = bookingRepo.findByPublicId(bookingId);
         if (bookingEntity == null) {
             throw new NotFoundException("Unable to find booking id:" + bookingId);
@@ -115,6 +140,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void deleteBooking(String publicId) {
+
+
+        if (!userService.isAccessingMyBooking(publicId) && !userService.isAccessedByRoomAdmin(publicId)) {
+            throw new AccessDeniedException("You are not allowed to delete this booking:" + publicId);
+        }
         BookingEntity bookingEntity = bookingRepo.findByPublicId(publicId);
         if (bookingEntity == null) {
             throw new NotFoundException("Unable to find booking id:" + publicId);
