@@ -8,7 +8,7 @@ Java, Html, CSS, JavaScript<br/>
 MySQL<br/>
 
 <i>Framework</i>:<br/>
-Spring Boot, Spring MVC, Spring Rest, React, Material UI<br/>
+React, Material UI, Spring Boot, Spring MVC, Spring Rest<br/>
 
 <b>App Screenshots</b>:<br/>
 <a href="https://1drv.ms/p/s!Ajr6t8lf42dOgVIYrPafyPPFKuu2?e=1fL9DJ">Click Here</a>
