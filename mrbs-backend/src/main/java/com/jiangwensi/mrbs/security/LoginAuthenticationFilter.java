@@ -83,11 +83,7 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
         loginResponse.setUserPublicId(userId);
 
         String responseJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(loginResponse);
-
         response.getWriter().write(responseJson);
-//        response.addHeader(HttpHeaders.AUTHORIZATION,"Bearer "+token);
-//        response.addHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,"Authorization,userid");
-//        response.addHeader("userid", userId);
     }
 
 }

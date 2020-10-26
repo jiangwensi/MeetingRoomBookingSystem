@@ -3,9 +3,7 @@ package com.jiangwensi.mrbs.repo;
 import com.jiangwensi.mrbs.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
@@ -87,20 +85,27 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             @Param("active") List<Boolean> active,
             @Param("verified") List<Boolean> verified);
 
+    @Query(nativeQuery = true,
+            value = "select case when count(*)>0 then true else false end from org_admin where user_id in (select id " +
+                    "from user where email  " +
+                    "=:email)")
+    int isAnOrgAdmin(@Param("email")String email);
 
+    @Query(nativeQuery = true,
+            value = "select case when count(*)>0 then true else false end from room_admin where user_id in (select id" +
+                    " from user where email  =:email)")
+    int isARoomAdmin(@Param("email")String email);
 
-//    @Query(nativeQuery = true,
-//            value= "select u.* from user u " +
-//                    "join user_role ur on u.id = ur.user_id "+
-//                    "join role r on ur.role_id = r.id " +
-//                    "where r.name in (:role) " +
-//                    "and u.active in (:active)" +
-//                    "and u.email_verified in (:verified)")
-//    List<UserEntity> search(
-//            @Param("role") List<String> role,
-//            @Param("active") List<Boolean> active,
-//            @Param("verified") List<Boolean> verified);
+    @Query(nativeQuery = true,
+            value = "select  case when count(*)>0 then true else false end from room_user where user_id in (select id" +
+                    " from user where email  =:email)")
+    int isARoomUser(@Param("email") String email);
 
-
+    @Query(nativeQuery = true,
+            value = "select  case when count(*)>0 then true else false end " +
+                    "from room_admin " +
+                    "where user_id in (select id from user where email  =:email) " +
+                    "and room_id in (select id from room where public_id = :roomPublicId)")
+    int isRoomAdminAccessingRoom(@Param("email") String email,@Param("roomPublicId") String roomPublicId);
 
 }

@@ -24,6 +24,7 @@ public interface UserService extends UserDetailsService {
     List<UserDto> search(String name, String email, List<String> role, List<Boolean> active,
                          List<Boolean> verified,Boolean verbose);
 
+
     UserDto findUserByPublicId(String publicId);
 
     void deleteUser(String publicId);
@@ -34,7 +35,6 @@ public interface UserService extends UserDetailsService {
 
     boolean isAccessingMyOrg(String orgPublicId);
 
-    boolean hasAuthorizedRoleOrAccessingMyOrganization(String authorizedRole, String orgPublicId);
 
     boolean isAccessedByRoomUser(String roomId);
 
@@ -50,7 +50,5 @@ public interface UserService extends UserDetailsService {
 
     boolean isRoomAdminAccessingRoom(String roomPublicId);
 
-    boolean isUserAccessingRoom(String roomPublicId);
-
-    boolean isSysadmAccessingRoom(String publicId);
+    boolean isSysadm();
 }

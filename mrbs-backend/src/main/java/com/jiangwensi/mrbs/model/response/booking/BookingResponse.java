@@ -12,6 +12,7 @@ public class BookingResponse extends GeneralResponse {
     private String toTime;
     private String room;
     private String bookedBy;
+    private String bookedByName;
 
     public String getPublicId() {
         return publicId;
@@ -51,5 +52,13 @@ public class BookingResponse extends GeneralResponse {
 
     public void setBookedBy(String bookedBy) {
         this.bookedBy = bookedBy;
+    }
+
+    public String getBookedByName() {
+        return bookedByName;
+    }
+
+    public void setBookedByName(String bookedByName) {
+        this.bookedByName = bookedByName;
     }
 }

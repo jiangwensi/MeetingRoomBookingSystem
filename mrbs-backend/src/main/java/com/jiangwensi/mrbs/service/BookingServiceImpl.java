@@ -20,6 +20,7 @@ import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,7 +31,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by Jiang Wensi on 25/8/2020
@@ -51,7 +51,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto createBooking(BookingRequest request) throws ParseException {
-
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDto userDto = userService.findUserByEmail(auth.getName());
@@ -76,14 +75,27 @@ public class BookingServiceImpl implements BookingService {
             throw new InvalidInputException("The time slot is not available. roomId:" + request.getRoomId() + ",from:" + request.getFromTime() + ",to:" + request.getToTime());
         }
 
-        BookingEntity bookingEntity = new BookingEntity();
-        bookingEntity.setBookedBy(userEntity);
-        bookingEntity.setRoom(roomEntity);
-        bookingEntity.setDate(new SimpleDateFormat(timeformat).parse(request.getFromTime()));
-        bookingEntity.setFromTime(new SimpleDateFormat(timeformat).parse(request.getFromTime()));
-        bookingEntity.setToTime(new SimpleDateFormat(timeformat).parse(request.getToTime()));
-        bookingEntity.setPublicId(UUID.randomUUID().toString());
-        bookingEntity = bookingRepo.save(bookingEntity);
+//        BookingEntity bookingEntity = new BookingEntity();
+//        bookingEntity.setBookedBy(userEntity);
+//        bookingEntity.setRoom(roomEntity);
+//        bookingEntity.setDate(new SimpleDateFormat(timeformat).parse(request.getFromTime()));
+//        bookingEntity.setFromTime(new SimpleDateFormat(timeformat).parse(request.getFromTime()));
+//        bookingEntity.setToTime(new SimpleDateFormat(timeformat).parse(request.getToTime()));
+//        bookingEntity.setPublicId(UUID.randomUUID().toString());
+//        bookingEntity = bookingRepo.save(bookingEntity);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        String from = sdf.format(sdf.parse(request.getFromTime()));
+        String to = sdf.format(sdf.parse(request.getToTime()));
+        String roomId = Long.toString(roomEntity.getId());
+        String bookedBy = Long.toString(userEntity.getId());
+        BookingEntity bookingEntity;
+        try{
+            bookingEntity = bookingRepo.createBooking(from,to,roomId,bookedBy);
+        } catch (JpaSystemException e){
+            throw new InvalidInputException("This selected time slot might be unavailable. Please try another " +
+                    "timeslot.");
+        }
 
         BookingDto returnValue = new BookingDto();
         MyModelMapper.bookingEntityToDtoModelMapper().map(bookingEntity, returnValue);

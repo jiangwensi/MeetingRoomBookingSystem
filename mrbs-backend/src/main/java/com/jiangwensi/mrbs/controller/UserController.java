@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @GetMapping(PathConst.USER_PATH)
-    @PreAuthorize("hasAuthority('SYSADM')")
+//    @PreAuthorize("hasAuthority('SYSADM')")
     public SearchUserResponse searchUser(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email,
@@ -164,8 +164,8 @@ public class UserController {
         try{
             userService.deleteUser(publicId);
         } catch (DataIntegrityViolationException e){
-            throw new InvalidInputException("Unable to delete this user. Please make sure this user is not admin or " +
-                    "user of a room or organization");
+            throw new InvalidInputException("Unable to delete this user. Please make sure this user is not enrolled " +
+                    "in any organizations or rooms");
         }
         GeneralResponse returnValue = new GeneralResponse();
         returnValue.setStatus(MyResponseStatus.success.toString());

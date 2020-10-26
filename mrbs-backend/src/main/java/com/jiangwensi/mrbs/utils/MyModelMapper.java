@@ -253,6 +253,7 @@ public class MyModelMapper {
                 BookingEntity s = context.getSource();
                 BookingDto d = context.getDestination();
                 d.setBookedBy(s.getBookedBy().getPublicId());
+                d.setBookedByName(s.getBookedBy().getName());
                 d.setDate(new SimpleDateFormat("yyyy-MM-dd").format(s.getDate()));
                 d.setFromTime(new SimpleDateFormat("HH:mm:ss").format(s.getFromTime()));
                 d.setToTime(new SimpleDateFormat("HH:mm:ss").format(s.getToTime()));

@@ -5,6 +5,7 @@ import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.*;
 import com.jiangwensi.mrbs.enumeration.RoleName;
 import com.jiangwensi.mrbs.enumeration.TokenType;
+import com.jiangwensi.mrbs.exception.AccessDeniedException;
 import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
 import com.jiangwensi.mrbs.model.request.user.UpdateUserRequest;
@@ -101,7 +102,7 @@ public class UserServiceImpl implements UserService {
         userEntity.getTokens().add(tokenEntity);
         userRepository.save(userEntity);
         UserDto returnValue = new UserDto();
-        MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity,returnValue);
+        MyModelMapper.userEntityToUserDtoModelMapper().map(userEntity, returnValue);
         roleEntity.getUsers().add(userEntity);
         roleRepository.save(roleEntity);
 
@@ -160,7 +161,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> search(String name, String email, List<String> role, List<Boolean> active,
-                                List<Boolean> verified,Boolean verbose) {
+                                List<Boolean> verified, Boolean verbose) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        int isAOrgAdmin = userRepository.isAnOrgAdmin(auth.getName());
+        int isARoomAdmin = userRepository.isARoomAdmin(auth.getName());
+        boolean isSysAdmin = isSysadm();
+        if (isAOrgAdmin == 0 && isARoomAdmin==0  &&!isSysAdmin) {
+            throw new AccessDeniedException("You are not allowed to search users");
+        }
+
         List<UserEntity> userEntities = new ArrayList<>();
         boolean nameEmpty = MyStringUtils.isEmpty(name);
         boolean emailEmpty = MyStringUtils.isEmpty(email);
@@ -205,7 +215,7 @@ public class UserServiceImpl implements UserService {
         if (userEntities != null && userEntities.size() > 0) {
             for (UserEntity e : userEntities) {
                 UserDto userDto = new UserDto();
-                if(verbose==null || verbose==false) {
+                if (verbose == null || verbose == false) {
                     e.setBookings(null);
                     e.setIsAdminOfOrganizations(null);
                     e.setIsAdminOfRooms(null);
@@ -219,6 +229,7 @@ public class UserServiceImpl implements UserService {
 
         return returnValue;
     }
+
 
     @Override
     public UserDto findUserByPublicId(String publicId) {
@@ -261,7 +272,7 @@ public class UserServiceImpl implements UserService {
 
         List<RoleEntity> oldRoleEntities = userEntity.getRoles();
         List<RoleEntity> newRoleEntities = new ArrayList<>();
-        for (String str :  request.getRoles()) {
+        for (String str : request.getRoles()) {
             RoleEntity re = roleRepository.findByName(str);
             if (re == null) {
                 throw new InvalidInputException("Wrong role:" + str);
@@ -341,33 +352,12 @@ public class UserServiceImpl implements UserService {
     }
 
 
-
-    @Override
-    public boolean hasAuthorizedRoleOrAccessingMyOrganization(String authorizedRole, String orgPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        List<GrantedAuthority> grantedAuthorities = (List<GrantedAuthority>) auth.getAuthorities();
-        for(GrantedAuthority ga: grantedAuthorities){
-            if(ga.getAuthority().equals(authorizedRole)){
-                return true;
-            }
-        }
-
-        List<String> admins = orgRepository.findByPublicId(orgPublicId).getAdmins().stream().map(e->e.getPublicId()).collect(Collectors.toList());
-        UserDto userDto = findUserByEmail(auth.getName());
-        for(String admin: admins){
-            if(userDto.getPublicId().equals(admin)){
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public boolean isAccessedByRoomUser(String roomId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDto userDto = findUserByEmail(auth.getName());
 
-        List<String> roomUsers = roomRepo.findByPublicId(roomId).getUsers().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        List<String> roomUsers = roomRepo.findByPublicId(roomId).getUsers().stream().map(e -> e.getPublicId()).collect(Collectors.toList());
         if (roomUsers != null && roomUsers.size() > 0) {
             for (String roomUser : roomUsers) {
                 if (roomUser.equals(userDto.getPublicId())) {
@@ -401,7 +391,7 @@ public class UserServiceImpl implements UserService {
         UserDto userDto = findUserByEmail(auth.getName());
         BookingEntity bookingEntity = bookingRepository.findByPublicId(bookingPublicId);
         RoomEntity roomEntity = roomRepo.findByPublicId(bookingEntity.getRoom().getPublicId());
-        List<String> roomAdms = roomEntity.getAdmins().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        List<String> roomAdms = roomEntity.getAdmins().stream().map(e -> e.getPublicId()).collect(Collectors.toList());
         if (roomAdms != null && roomAdms.size() > 0) {
             for (String roomAdm : roomAdms) {
                 if (roomAdm.equals(userDto.getPublicId())) {
@@ -417,20 +407,18 @@ public class UserServiceImpl implements UserService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserEntity userEntity = userRepository.findByEmail(auth.getName());
         BookingEntity bookingEntity = bookingRepository.findByPublicId(bookingId);
-        if (userEntity.getId()==bookingEntity.getBookedBy().getId()) {
+        if (userEntity.getId() == bookingEntity.getBookedBy().getId()) {
             return true;
         }
         return false;
     }
 
 
-
-
     @Override
     public boolean isAccessingMyOrg(String orgPublicId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<String> isAdminOfOrganizations =
-                userRepository.findByEmail(auth.getName()).getIsAdminOfOrganizations().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+                userRepository.findByEmail(auth.getName()).getIsAdminOfOrganizations().stream().map(e -> e.getPublicId()).collect(Collectors.toList());
         if (isAdminOfOrganizations != null) {
             return isAdminOfOrganizations.contains(orgPublicId);
         }
@@ -446,7 +434,7 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(auth.getName());
         OrganizationEntity orgEntity = orgRepository.findByPublicId(roomEntity.getOrganization().getPublicId());
 
-        List<String> orgAdmins = orgEntity.getAdmins().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        List<String> orgAdmins = orgEntity.getAdmins().stream().map(e -> e.getPublicId()).collect(Collectors.toList());
         for (String admin : orgAdmins) {
             if (userEntity.getPublicId().equals(admin)) {
                 return true;
@@ -461,12 +449,12 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(auth.getName());
 
         List<String> roomsInMyOrganizations = new ArrayList<>();
-        List<String> isAdminOfOrganizations = userEntity.getIsAdminOfOrganizations().stream().map(e->e.getPublicId()).collect(Collectors.toList());
+        List<String> isAdminOfOrganizations = userEntity.getIsAdminOfOrganizations().stream().map(e -> e.getPublicId()).collect(Collectors.toList());
         if (isAdminOfOrganizations != null) {
             List<OrganizationEntity> organizationEntities =
-                    isAdminOfOrganizations.stream().map(e->orgRepository.findByPublicId(e)).collect(Collectors.toList());
+                    isAdminOfOrganizations.stream().map(e -> orgRepository.findByPublicId(e)).collect(Collectors.toList());
             if (organizationEntities != null) {
-                organizationEntities.forEach(e -> roomsInMyOrganizations.addAll(e.getRooms().stream().map(r->r.getPublicId()).collect(Collectors.toList())));
+                organizationEntities.forEach(e -> roomsInMyOrganizations.addAll(e.getRooms().stream().map(r -> r.getPublicId()).collect(Collectors.toList())));
             }
         }
 
@@ -475,36 +463,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isRoomAdminAccessingRoom(String roomPublicId) {
-        UserDto userDto = getUserDto();
-        List<String> isAdminOfRooms = userDto.getIsAdminOfRooms();
-        if (isAdminOfRooms != null) {
-            return isAdminOfRooms.contains(roomPublicId);
-        }
-        return false;
-    }
 
-    public UserDto getUserDto() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return findUserByEmail(auth.getName());
+        int isRoomAdminAccessingRoom = userRepository.isRoomAdminAccessingRoom(auth.getName(),roomPublicId);
+        return isRoomAdminAccessingRoom==1;
     }
 
     @Override
-    public boolean isUserAccessingRoom(String roomPublicId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        RoomEntity roomEntity = roomRepo.findByPublicId(roomPublicId);
-        List<UserEntity> userEntitys =
-                roomEntity.getUsers().stream().filter(e -> e.getEmail().equalsIgnoreCase(auth.getName())).collect(Collectors.toList());
-        if (userEntitys != null && userEntitys.size() == 1) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean isSysadmAccessingRoom(String publicId) {
+    public boolean isSysadm() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         for (GrantedAuthority authority : auth.getAuthorities()) {
-            if(authority.getAuthority().equalsIgnoreCase("SYSADM")){
+            if (authority.getAuthority().equalsIgnoreCase("SYSADM")) {
                 return true;
             }
         }

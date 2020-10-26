@@ -14,6 +14,7 @@ import com.jiangwensi.mrbs.exception.NotFoundException;
 import com.jiangwensi.mrbs.repo.TokenRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,10 +26,10 @@ import java.util.List;
 public class SESServiceImpl implements SESService {
 
     UserRepository userRepository;
+    @Autowired
     TokenRepository tokenRepository;
+    @Autowired
     AppProperties appProperties;
-
-
 
     private String from;
 
@@ -60,7 +61,8 @@ public class SESServiceImpl implements SESService {
                 "<br/>\n" +
                 "Welcome to Meeting Room Booking System.\n" +
                 "<br/>\n" +
-                "Please click <a href=\"$link\">here</a> to verify your email address to complete sign up process.\n" +
+                "Please click <a href=\"$link\">here</a> to verify your email address and complete the sign up " +
+                "process.\n" +
                 "\n" +
                 "<br/>\n" +
                 "<br/>\n" +
@@ -77,7 +79,7 @@ public class SESServiceImpl implements SESService {
         String htmlText = "Hi $name,\n" +
                 "\n" +
                 "Welcome to Meeting Room Booking System.\n" +
-                "Please click here to verify your email address to complete sign up process.\n" +
+                "Please click here to verify your email address and complete the sign up process.\n" +
                 "\n" +
                 "Regards,\n" +
                 "Meeting Room Booking System\n" +
@@ -126,7 +128,7 @@ public class SESServiceImpl implements SESService {
                             .withRegion(Regions.AP_SOUTHEAST_1).build();
             SendEmailRequest request = new SendEmailRequest()
                     .withDestination(
-                            new Destination().withToAddresses(userDto.getEmail()))
+                            new Destination().withToAddresses(userDto.getEmail()).withCcAddresses(appProperties.getProperty("email.from")))
                     .withMessage(new Message()
                             .withBody(new Body()
                                     .withHtml(new Content()

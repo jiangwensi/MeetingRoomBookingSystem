@@ -35,12 +35,15 @@ public class OrgServiceImpl implements OrgService {
     private RoomRepository roomRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoomService roomService;
 
     public OrgServiceImpl(OrgRepository organizationRepository, BookingRepository bookingRepos, UserRepository userRepository, RoomRepository roomRepository) {
         this.organizationRepository = organizationRepository;
         this.bookingRepos = bookingRepos;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
+        this.roomService = roomService;
     }
 
     @Override
@@ -172,9 +175,10 @@ public class OrgServiceImpl implements OrgService {
                 .stream()
                 .map(r->r.getId())
                 .forEach(r->bookingRepos.deleteByRoomId(r));
-        roomRepository.deleteByOrgId(organizationEntity.getId());
+        organizationEntity.getRooms().stream().forEach(r->roomService.deleteRoom(r.getPublicId()));
         organizationRepository.deleteByPublicId(publicId);
     }
+
 
     @Override
     public List<UserDto> listAdminByOrg(String orgPublicId) {

@@ -46,12 +46,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         String bearerToken = authorization.replace("Bearer "," ");
         String email = TokenUtils.retrieveSubject(bearerToken);
-//        UserEntity userEntity =
-//                ((UserRepository) AppContext.getContext().getBean("userRepository")).findByEmail(email);
-//
-//        UserPrincipal principal = new UserPrincipal();
-//        principal.setUsername(email);
-//        principal.setEnabled(userEntity.isEmailVerified());
 
         UserService userService = (UserService) AppContext.getContext().getBean("userServiceImpl");
         UserPrincipal principal = (UserPrincipal) userService.loadUserByUsername(email);

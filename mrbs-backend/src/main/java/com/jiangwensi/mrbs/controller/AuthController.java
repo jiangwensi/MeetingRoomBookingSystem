@@ -79,8 +79,7 @@ public class AuthController {
         SESService.sendEmailVerification(userDto);
 
         SignUpResponse returnValue = mapper.map(userDto, SignUpResponse.class);
-        returnValue.setMessage("Verification link is sent to " + email + ", please login your email and click the " +
-                "verification link to complete the sign up process. Thanks!");
+        returnValue.setMessage("Verification email is sent. Please login the mailbox to verify your email");
 
         return returnValue;
     }

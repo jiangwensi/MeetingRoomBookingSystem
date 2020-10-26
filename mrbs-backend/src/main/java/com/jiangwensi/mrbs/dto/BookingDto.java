@@ -10,6 +10,7 @@ public class BookingDto {
     private String toTime;
     private String roomId;
     private String bookedBy;
+    private String bookedByName;
 
     public String getPublicId() {
         return publicId;
@@ -57,5 +58,13 @@ public class BookingDto {
 
     public void setBookedBy(String bookedBy) {
         this.bookedBy = bookedBy;
+    }
+
+    public String getBookedByName() {
+        return bookedByName;
+    }
+
+    public void setBookedByName(String bookedByName) {
+        this.bookedByName = bookedByName;
     }
 }

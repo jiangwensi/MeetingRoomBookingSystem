@@ -52,7 +52,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public List<RoomDto> searchRoom(String name, String orgName, Boolean active,Boolean myEnrolledRoomOnly) {
+    public List<RoomDto> searchRoom(String name, String orgName, Boolean active, Boolean myEnrolledRoomOnly) {
 
         List<RoomDto> returnValue = new ArrayList<>();
         List<RoomEntity> roomEntities = roomRepo.searchRoom(name, orgName, active);
@@ -66,15 +66,15 @@ public class RoomServiceImpl implements RoomService {
         roomEntities
                 .stream()
                 .filter(
-                        e-> myEnrolledRoomOnly==null
+                        e -> myEnrolledRoomOnly == null
                                 || !myEnrolledRoomOnly
-                                || (myEnrolledRoomOnly&&userService.isAccessedByRoomUser(e.getPublicId()))
-                                || (myEnrolledRoomOnly&&userService.isRoomAdminAccessingRoom(e.getPublicId())))
+                                || (myEnrolledRoomOnly && userService.isAccessedByRoomUser(e.getPublicId()))
+                                || (myEnrolledRoomOnly && userService.isRoomAdminAccessingRoom(e.getPublicId())))
                 .forEach(e -> {
                     RoomDto roomDto = new RoomDto();
-                    if(!userService.isOrgAdminAccessingRoom(e.getPublicId()) &&
+                    if (!userService.isOrgAdminAccessingRoom(e.getPublicId()) &&
                             !userService.isRoomAdminAccessingRoom(e.getPublicId()) &&
-                            !userService.isSysadmAccessingRoom(e.getPublicId())) {
+                            !userService.isSysadm()) {
                         e.setUsers(null);
                     }
                     mm.map(e, roomDto);
@@ -98,12 +98,12 @@ public class RoomServiceImpl implements RoomService {
         if (!userService.isOrgAdminAccessingRoom(publicId)
                 && !userService.isRoomAdminAccessingRoom(publicId)
 //                && !userService.isUserAccessingRoom(publicId)
-                && !userService.isSysadmAccessingRoom(publicId)) {
+                && !userService.isSysadm()) {
 //            throw new AccessDeniedException("You are not allowed to view room " + publicId);
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             UserEntity userEntity = userRepo.findByEmail(auth.getName());
             String myPublicId = userEntity.getPublicId();
-            roomEntity.getUsers().stream().filter(e->e.getPublicId().equals(myPublicId));
+            roomEntity.getUsers().stream().filter(e -> e.getPublicId().equals(myPublicId));
         }
         ModelMapper mm = MyModelMapper.roomEntityToDtoModelMapper();
         mm.map(roomEntity, returnValue);
@@ -196,7 +196,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public RoomDto updateRoom(RoomRequest request) {
         String publicId = request.getPublicId();
-        if (!userService.isAccessingMyRoomOrgAdmin(publicId)) {
+        if (!userService.isAccessingMyRoomOrgAdmin(publicId)&&!userService.isRoomAdminAccessingRoom(publicId)) {
             throw new AccessDeniedException("You are not allowed to edit this room");
         }
         String name = request.getName();
@@ -290,12 +290,12 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Transactional
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteRoom(String publicId) {
         log.info("deleteRoom publicId:" + publicId);
 
-        if (!userService.isAccessingMyRoomOrgAdmin(publicId)) {
-            throw new AccessDeniedException("You are not allowed to delete this room id:" + publicId);
+        if (!userService.isAccessingMyRoomOrgAdmin(publicId) && !userService.isSysadm()) {
+            throw new AccessDeniedException("You are not allowed to delete this room:" + publicId);
         }
 
         bookingRepo.deleteBookingByRoomPublicId(publicId);
@@ -401,7 +401,7 @@ public class RoomServiceImpl implements RoomService {
         if (!userService.isOrgAdminAccessingRoom(roomPublicId)
                 && !userService.isRoomAdminAccessingRoom(roomPublicId)
 //                && !userService.isUserAccessingRoom(publicId)
-                && !userService.isSysadmAccessingRoom(roomPublicId)) {
+                && !userService.isSysadm()) {
             throw new AccessDeniedException("You are not allowed to list user for this room");
 //            roomEntity.setUsers(null);
         }

@@ -10,6 +10,7 @@ public class SearchBookingResponseItem {
     private String toTime;
     private String roomId;
     private String bookedBy;
+    private String bookedByName;
 
     public String getPublicId() {
         return publicId;
@@ -57,5 +58,13 @@ public class SearchBookingResponseItem {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getBookedByName() {
+        return bookedByName;
+    }
+
+    public void setBookedByName(String bookedByName) {
+        this.bookedByName = bookedByName;
     }
 }

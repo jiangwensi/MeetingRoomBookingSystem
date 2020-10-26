@@ -1,6 +1,7 @@
 package com.jiangwensi.mrbs.repo;
 
 import com.jiangwensi.mrbs.entity.RoomEntity;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -30,6 +31,7 @@ public interface RoomRepository extends CrudRepository<RoomEntity,Long> {
     RoomEntity findByRoomNameAndOrgPublicId(@Param("roomName") String roomName, @Param("orgPublicId") String orgPublicId);
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Modifying
     @Query(nativeQuery = true,
     value = "delete from room where org_id in (select id from org where id = :orgId )")
     void deleteByOrgId(@Param("orgId") Long orgId);
