@@ -1,4 +1,41 @@
 DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createBooking`(in theFrom datetime, in theTo datetime,in theRoomId int, in theBookedBy int)
+begin
+	declare isAvail bool default false;
+	declare thePublicId text default UUID();
+    select count(*)=0 from booking b 
+	where b.room_id = theRoomId 
+	and ((b.from_time<=theFrom and theFrom<b.to_time )or( theFrom<b.from_time and b.from_time<=theTo )) for update into isAvail;
+    
+    if isAvail then
+		begin
+			insert into booking (date, from_time, to_time, public_id, booked_by, room_id) values (date(theFrom),theFrom,theTo,thePublicId,theBookedBy,theRoomId);
+        end;
+        select * from booking WHERE public_id = thePublicId;
+    end if;
+end$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `clearData`()
+begin
+SET FOREIGN_KEY_CHECKS = 0; 
+truncate booking;
+truncate room_image;
+truncate room_user;
+truncate room_admin;
+truncate blocked_timeslot;
+truncate room;
+truncate org_admin;
+truncate org;
+truncate user_role;
+truncate token;
+truncate user;
+SET FOREIGN_KEY_CHECKS = 1;
+end$$
+DELIMITER ;
+
+DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `createBookingTestData`(in dataSize int)
 begin
 	declare count int default 0;
@@ -15,7 +52,6 @@ begin
     declare countExisting int;
     declare continue handler for sqlexception begin select theDate, theFrom, theTo, userId, roomId;  end;
     select count(*) from room where active = true into roomSize;
-    
     while count < dataSize do
 		# set room_id
 		set randRoomId := floor(rand()*(roomSize-1));
@@ -35,36 +71,11 @@ begin
 			
 			# set to
 			select timestamp(theFrom) + interval round(rand()*1)+1 hour into theTo;
-			
-			set countExisting:=0;
-			select count(*) from booking where date = theDate and from_time=theFrom and to_time=theTo and room_id=roomId into countExisting;
-			if countExisting = 0 then
-				begin
-					insert into booking ( date, from_time, public_id, to_time, booked_by, room_id) values ( theDate, theFrom, UUID(), theTo, userId, roomId);
-                end;
-				set count:=count+1;
-			end if;
+			insert into booking ( date, from_time, public_id, to_time, booked_by, room_id) values ( theDate, theFrom, UUID(), theTo, userId, roomId);
+			set count:=count+1;
         end if;
     end while;
 
-end$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `clearData`()
-begin
-SET FOREIGN_KEY_CHECKS = 0; 
-truncate booking;
-truncate room_image;
-truncate room_user;
-truncate room_admin;
-truncate blocked_timeslot;
-truncate room;
-truncate org_admin;
-truncate org;
-truncate user_role;
-truncate user;
-SET FOREIGN_KEY_CHECKS = 1;
 end$$
 DELIMITER ;
 
@@ -131,51 +142,59 @@ begin
 		declare userIndex3 int;
 		declare userIndex4 int;
 		declare adminIndex int;
+        
         declare user1 int;
         declare user2 int;
         declare user3 int;
         declare user4 int;
         declare theAdmin int;
-        declare roomIndex int;
-        declare locIndex int;
+        
+        declare roomNameIndex int;
+        declare locNameIndex int;
         declare orgIndex int;
+        
         declare roomId int;
         declare orgId int;
         declare theDesc text;
         declare theName text;
-        declare count int default 0;
-        declare continue handler for SQLEXCEPTION begin end;
-        
-		select max(id) from room into roomId;
+        declare theLocName text;
+        declare theRoomName text;
+        declare count int default -1;
+		select ifnull(max(id),0) from room into roomId;
         l:loop
-			set roomId :=roomId + 1;
-			if count>size then leave l; end if;
-			select round(count(*)*rand()) from user into userIndex1;
-			select id from user limit userIndex1,1 into user1;
-            select round(count(*)*rand()) from user into userIndex2;
-			select id from user limit userIndex2,1 into user2;
-			select round(count(*)*rand()) from user into userIndex3;
-			select id from user limit userIndex3,1 into user3;
-			select round(count(*)*rand()) from user into userIndex4;
-			select id from user limit userIndex4,1 into user4;
-			select round(count(*)*rand()) from user into adminIndex;
-			select id from user limit adminIndex,1 into theAdmin;
-			select round(count(*)*rand()) from room into roomIndex;
-			select round(count(*)*rand()) from locationName into locIndex;
-			select round(count(*)*rand()) from org into orgIndex;
-            
-			
-			select n from roomName limit roomIndex,1 into theName;
-			select id from org limit orgIndex,1 into orgId;
-			select concat(n," Description") from roomName limit roomIndex,1 into theDesc;
-			insert into room (id,active,capacity,description, facilities,name,public_id,org_id) 
-			values(roomId, 1, round(rand()*10)+2, theDesc,"chairs, tables, whiteboards, projectors",theName,UUID(),orgId);
-            insert into room_admin(room_id,user_id)values(roomId,theAdmin);
-            insert into room_user(room_id,user_id)values(roomId,user1);
-            insert into room_user(room_id,user_id)values(roomId,user2);
-            insert into room_user(room_id,user_id)values(roomId,user3);
-            insert into room_user(room_id,user_id)values(roomId,user4);
             set count:=count+1;
+			if count>size then leave l; end if;
+			begin
+			declare exit handler for SQLEXCEPTION begin rollback; end;
+			set roomId :=roomId + 1;
+			select floor((count(*)-1)*rand()) from roomName into roomNameIndex;
+			select floor((count(*)-1)*rand()) from locationName into locNameIndex;
+			select floor((count(*)-1)*rand()) from org into orgIndex;
+			select n from roomName limit roomNameIndex,1 into theRoomName;
+			select n from locationName limit locNameIndex,1 into theLocName;
+            select concat(theLocName," ",theRoomName) into theName;
+            
+			select id from org limit orgIndex,1 into orgId;
+            
+			select concat(n," Description") from roomName limit roomNameIndex,1 into theDesc;
+			insert into room (id,`active`,capacity,`description`, facilities,`name`,public_id,org_id) 
+            values(roomId, 1, round(rand()*10)+2, theDesc,"chairs, tables, whiteboards, projectors",theName,UUID(),orgId);
+            
+			select floor((count(*)-1)*rand()) from user into adminIndex;
+			select id from user limit adminIndex,1 into theAdmin;
+            insert into room_admin(room_id,user_id)values(roomId,theAdmin);
+            
+			select floor((count(*)-1)*rand()) from user into userIndex1;
+			select id from user limit userIndex1,1 into user1;
+            select floor((count(*)-1)*rand()) from user into userIndex2;
+			select id from user limit userIndex2,1 into user2;
+			select floor((count(*)-1)*rand()) from user into userIndex3;
+			select id from user limit userIndex3,1 into user3;
+			select floor((count(*)-1)*rand()) from user into userIndex4;
+			select id from user limit userIndex4,1 into user4;
+            insert into room_user(room_id,user_id)values(roomId,user1),(roomId,user2),(roomId,user3),(roomId,user4);
+            
+            end;
         end loop l;
 	end;
     
@@ -183,6 +202,20 @@ begin
 		drop temporary table roomName;
 		drop temporary table locationName;
 	end;
+end$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createTestData`(in userSize int, in orgSize int, in roomSize int, in bookingSize int)
+begin 
+	call createUserTestData(userSize);
+    select concat("finished createUserTestData:",userSize,"record");
+    call createOrgTestData(orgSize);
+    select concat("finished createOrgTestData:",orgSize,"record");
+    call createRoomTestData(roomSize);
+    select concat("finished createRoomTestData:",roomSize,"record");
+    call createBookingTestData(bookingSize);
+    select concat("finished createBookingTestData:",bookingSize,"record");
 end$$
 DELIMITER ;
 
