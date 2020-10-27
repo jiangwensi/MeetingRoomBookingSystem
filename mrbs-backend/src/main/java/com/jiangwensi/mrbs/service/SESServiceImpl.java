@@ -100,8 +100,6 @@ public class SESServiceImpl implements SESService {
     }
 
     public void loadProperties() {
-        System.setProperty("aws.accessKeyId", appProperties.getProperty(PropKeyConst.AWS_ACCESS_KEY_ID));
-        System.setProperty("aws.secretKey", appProperties.getProperty(PropKeyConst.AWS_SECRET_KEY));
         from = appProperties.getProperty(PropKeyConst.EMAIL_FROM);
     }
 
