@@ -18,6 +18,7 @@ import com.jiangwensi.mrbs.repo.UserRepository;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +35,8 @@ public class SESServiceImpl implements SESService {
     TokenRepository tokenRepository;
     @Autowired
     AppProperties appProperties;
+    @Value("${domain}")
+    private String domain;
 
     private String from;
 
@@ -96,7 +99,7 @@ public class SESServiceImpl implements SESService {
             throw new NotFoundException("Verification token is not found for email " + userDto.getEmail());
         }
 
-        String endpoint = "http://localhost:8080/users/verify-email?token=$token";
+        String endpoint = "http://"+domain+":8080/users/verify-email?token=$token";
 
 
         sendEmail(userDto, endpoint, subject, htmlBody, htmlText, token);
