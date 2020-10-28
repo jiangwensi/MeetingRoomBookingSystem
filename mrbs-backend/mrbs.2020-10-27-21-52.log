@@ -1,0 +1,185 @@
+2020-10-27 21:52:39,526 [Thread-10] INFO   o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2020-10-27 21:52:39,529 [Thread-10] INFO   o.s.s.c.ThreadPoolTaskExecutor - Shutting down ExecutorService 'applicationTaskExecutor'
+2020-10-27 21:52:39,530 [Thread-10] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2020-10-27 21:52:39,533 [Thread-10] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2020-10-27 21:52:51,413 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - Starting MeetingRoomBookingSystemApplication on DESKTOP-40A7GOP with PID 10816 (D:\MyProjects\mrbs\sourcecodes\mrbs-backend\target\classes started by jwswe in D:\MyProjects\mrbs\sourcecodes\mrbs-backend)
+2020-10-27 21:52:51,414 [restartedMain] DEBUG  c.j.m.MeetingRoomBookingSystemApplication - Running with Spring Boot v2.3.3.RELEASE, Spring v5.2.8.RELEASE
+2020-10-27 21:52:51,414 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - No active profile set, falling back to default profiles: default
+2020-10-27 21:52:51,520 [restartedMain] INFO   o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFERRED mode.
+2020-10-27 21:52:51,521 [restartedMain] INFO   o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 0ms. Found 0 JPA repository interfaces.
+2020-10-27 21:52:51,691 [restartedMain] INFO   o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2020-10-27 21:52:51,691 [restartedMain] INFO   o.a.catalina.core.StandardService - Starting service [Tomcat]
+2020-10-27 21:52:51,692 [restartedMain] INFO   o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.37]
+2020-10-27 21:52:51,692 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - Loaded Apache Tomcat Native library [1.2.24] using APR version [1.7.0].
+2020-10-27 21:52:51,692 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true].
+2020-10-27 21:52:51,692 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+2020-10-27 21:52:51,692 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - OpenSSL successfully initialized [OpenSSL 1.1.1g  21 Apr 2020]
+2020-10-27 21:52:51,725 [restartedMain] INFO   o.a.c.c.C.[.[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2020-10-27 21:52:51,725 [restartedMain] INFO   o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 309 ms
+2020-10-27 21:52:51,759 [restartedMain] INFO   o.s.s.c.ThreadPoolTaskExecutor - Initializing ExecutorService 'applicationTaskExecutor'
+2020-10-27 21:52:51,761 [task-1] INFO   o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2020-10-27 21:52:51,764 [task-1] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2020-10-27 21:52:51,775 [restartedMain] WARN   o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2020-10-27 21:52:51,777 [task-1] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2020-10-27 21:52:51,777 [task-1] INFO   org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect
+2020-10-27 21:52:51,807 [task-1] INFO   o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2020-10-27 21:52:51,808 [task-1] INFO   o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2020-10-27 21:52:51,839 [task-2] INFO   o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2020-10-27 21:52:51,897 [restartedMain] DEBUG  o.s.s.c.a.a.c.AuthenticationConfiguration$EnableGlobalAuthenticationAutowiredConfigurer - Eagerly initializing {org.springframework.boot.autoconfigure.security.servlet.WebSecurityEnablerConfiguration=org.springframework.boot.autoconfigure.security.servlet.WebSecurityEnablerConfiguration@67ccea4e}
+2020-10-27 21:52:51,901 [restartedMain] INFO   o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 956f47e7-2156-4750-8ae0-6a6edacc447e
+
+2020-10-27 21:52:51,903 [restartedMain] DEBUG  o.s.s.c.a.w.c.WebSecurityConfigurerAdapter - Using default configure(HttpSecurity). If subclassed this will potentially override subclass configure(HttpSecurity).
+2020-10-27 21:52:51,916 [restartedMain] DEBUG  o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression 'authenticated', for any request
+2020-10-27 21:52:51,916 [restartedMain] DEBUG  o.s.s.w.a.i.FilterSecurityInterceptor - Validated configuration attributes
+2020-10-27 21:52:51,917 [restartedMain] DEBUG  o.s.s.w.a.i.FilterSecurityInterceptor - Validated configuration attributes
+2020-10-27 21:52:51,918 [restartedMain] INFO   o.s.s.w.DefaultSecurityFilterChain - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@141498a4, org.springframework.security.web.context.SecurityContextPersistenceFilter@57fd48ef, org.springframework.security.web.header.HeaderWriterFilter@105d44eb, org.springframework.security.web.csrf.CsrfFilter@6046d383, org.springframework.security.web.authentication.logout.LogoutFilter@3d625bf9, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@1cb1dfed, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@2a5f3c9e, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@2461e01d, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@6816dd4b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1c7f3e86, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@66ff4bfe, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7a439d5f, org.springframework.security.web.session.SessionManagementFilter@46d157a8, org.springframework.security.web.access.ExceptionTranslationFilter@6a242da3, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@3c0ad251]
+2020-10-27 21:52:51,934 [restartedMain] INFO   o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2020-10-27 21:52:51,934 [restartedMain] INFO   o.s.d.r.c.DeferredRepositoryInitializationListener - Triggering deferred initialization of Spring Data repositories…
+2020-10-27 21:52:51,935 [restartedMain] INFO   o.s.d.r.c.DeferredRepositoryInitializationListener - Spring Data repositories initialized!
+2020-10-27 21:52:51,937 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - Started MeetingRoomBookingSystemApplication in 0.548 seconds (JVM running for 87.434)
+2020-10-27 21:52:51,940 [restartedMain] INFO   o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter' (OnClassCondition)
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnMissingBean (types: org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   UserDetailsServiceAutoConfiguration matched:
+      - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+      - @ConditionalOnBean (types: org.springframework.security.config.annotation.ObjectPostProcessor; SearchStrategy: all) found bean 'objectPostProcessor'; @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.oauth2.jwt.JwtDecoder,org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   UserDetailsServiceAutoConfiguration#inMemoryUserDetailsManager matched:
+      - @ConditionalOnMissingBean (types: org.springframework.security.oauth2.client.registration.ClientRegistrationRepository; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+   WebSecurityEnablerConfiguration matched:
+      - found 'session' scope (OnWebApplicationCondition)
+      - @ConditionalOnBean (types: org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter; SearchStrategy: all) found bean 'org.springframework.boot.autoconfigure.security.servlet.SpringBootWebSecurityConfiguration$DefaultConfigurerAdapter'; @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) did not find any beans (OnBeanCondition)
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+2020-10-27 21:52:55,220 [Thread-19] INFO   o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2020-10-27 21:52:55,220 [Thread-19] INFO   o.s.s.c.ThreadPoolTaskExecutor - Shutting down ExecutorService 'applicationTaskExecutor'
+2020-10-27 21:52:55,221 [Thread-19] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2020-10-27 21:52:55,225 [Thread-19] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2020-10-27 21:52:55,416 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - Starting MeetingRoomBookingSystemApplication on DESKTOP-40A7GOP with PID 10816 (D:\MyProjects\mrbs\sourcecodes\mrbs-backend\target\classes started by jwswe in D:\MyProjects\mrbs\sourcecodes\mrbs-backend)
+2020-10-27 21:52:55,416 [restartedMain] DEBUG  c.j.m.MeetingRoomBookingSystemApplication - Running with Spring Boot v2.3.3.RELEASE, Spring v5.2.8.RELEASE
+2020-10-27 21:52:55,416 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - No active profile set, falling back to default profiles: default
+2020-10-27 21:52:55,586 [restartedMain] INFO   o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFERRED mode.
+2020-10-27 21:52:55,632 [restartedMain] INFO   o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 45ms. Found 7 JPA repository interfaces.
+2020-10-27 21:52:55,676 [restartedMain] INFO   o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@7acbbcc2' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-10-27 21:52:55,678 [restartedMain] INFO   o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-10-27 21:52:55,843 [restartedMain] INFO   o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2020-10-27 21:52:55,844 [restartedMain] INFO   o.a.catalina.core.StandardService - Starting service [Tomcat]
+2020-10-27 21:52:55,844 [restartedMain] INFO   o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.37]
+2020-10-27 21:52:55,844 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - Loaded Apache Tomcat Native library [1.2.24] using APR version [1.7.0].
+2020-10-27 21:52:55,844 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true].
+2020-10-27 21:52:55,845 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+2020-10-27 21:52:55,845 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - OpenSSL successfully initialized [OpenSSL 1.1.1g  21 Apr 2020]
+2020-10-27 21:52:55,878 [restartedMain] INFO   o.a.c.c.C.[.[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2020-10-27 21:52:55,878 [restartedMain] INFO   o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 460 ms
+2020-10-27 21:52:55,935 [restartedMain] INFO   o.s.s.c.ThreadPoolTaskExecutor - Initializing ExecutorService 'applicationTaskExecutor'
+2020-10-27 21:52:55,959 [task-1] INFO   o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2020-10-27 21:52:55,962 [task-1] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2020-10-27 21:52:55,967 [restartedMain] INFO   o.s.b.f.a.AutowiredAnnotationBeanPostProcessor - Autowired annotation is not supported on static fields: private static org.springframework.context.ApplicationContext com.jiangwensi.mrbs.AppContext.context
+2020-10-27 21:52:55,967 [restartedMain] DEBUG  com.jiangwensi.mrbs.AppContext - setApplicationContext is called
+2020-10-27 21:52:55,972 [task-1] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2020-10-27 21:52:55,972 [task-1] INFO   org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect
+2020-10-27 21:52:56,008 [restartedMain] WARN   o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2020-10-27 21:52:56,072 [task-1] INFO   o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2020-10-27 21:52:56,072 [task-1] INFO   o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2020-10-27 21:52:56,118 [task-2] INFO   o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2020-10-27 21:52:56,165 [restartedMain] DEBUG  o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression 'permitAll', for Ant [pattern='/auth/signUp', POST]
+2020-10-27 21:52:56,165 [restartedMain] DEBUG  o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression 'permitAll', for Ant [pattern='/auth/verifyEmail', GET]
+2020-10-27 21:52:56,165 [restartedMain] DEBUG  o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression 'permitAll', for Ant [pattern='/auth/requestResetForgottenPassword', POST]
+2020-10-27 21:52:56,165 [restartedMain] DEBUG  o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression 'permitAll', for Ant [pattern='/auth/resetForgottenPassword', POST]
+2020-10-27 21:52:56,165 [restartedMain] DEBUG  o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression 'permitAll', for Ant [pattern='/auth/resetPassword', POST]
+2020-10-27 21:52:56,165 [restartedMain] DEBUG  o.s.s.w.a.e.ExpressionBasedFilterInvocationSecurityMetadataSource - Adding web access control expression 'authenticated', for any request
+2020-10-27 21:52:56,167 [restartedMain] DEBUG  o.s.s.w.a.i.FilterSecurityInterceptor - Validated configuration attributes
+2020-10-27 21:52:56,167 [restartedMain] DEBUG  o.s.s.w.a.i.FilterSecurityInterceptor - Validated configuration attributes
+2020-10-27 21:52:56,169 [restartedMain] INFO   o.s.s.w.DefaultSecurityFilterChain - Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@29adc7ad, org.springframework.security.web.context.SecurityContextPersistenceFilter@111a4e23, org.springframework.security.web.header.HeaderWriterFilter@5bc9edc2, org.springframework.web.filter.CorsFilter@3557ee29, org.springframework.security.web.authentication.logout.LogoutFilter@6256fabd, com.jiangwensi.mrbs.security.LoginAuthenticationFilter@2aced13d, com.jiangwensi.mrbs.security.JwtAuthenticationFilter@6598489b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@58f5722f, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4cc6330e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@22cf7b2a, org.springframework.security.web.session.SessionManagementFilter@5377d45d, org.springframework.security.web.access.ExceptionTranslationFilter@7427a037, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@5db2557a]
+2020-10-27 21:52:56,173 [restartedMain] DEBUG  o.s.s.a.i.a.MethodSecurityInterceptor - Validated configuration attributes
+2020-10-27 21:52:56,434 [restartedMain] DEBUG  o.s.s.c.a.a.c.AuthenticationConfiguration$EnableGlobalAuthenticationAutowiredConfigurer - Eagerly initializing {webSecurityConfigurator=com.jiangwensi.mrbs.security.WebSecurityConfigurator$$EnhancerBySpringCGLIB$$8315e3a5@372d238}
+2020-10-27 21:52:56,439 [restartedMain] INFO   o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2020-10-27 21:52:56,439 [restartedMain] INFO   o.s.d.r.c.DeferredRepositoryInitializationListener - Triggering deferred initialization of Spring Data repositories…
+2020-10-27 21:52:56,681 [restartedMain] INFO   o.s.d.r.c.DeferredRepositoryInitializationListener - Spring Data repositories initialized!
+2020-10-27 21:52:56,683 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - Started MeetingRoomBookingSystemApplication in 1.289 seconds (JVM running for 92.18)
+2020-10-27 21:52:56,684 [restartedMain] DEBUG  c.j.mrbs.InitializeApplicationData - onApplicationEvent is called
+2020-10-27 21:52:56,702 [restartedMain] INFO   o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation delta:
+
+
+==========================
+CONDITION EVALUATION DELTA
+==========================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+   SpringBootWebSecurityConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter; SearchStrategy: all) found beans of type 'org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter' webSecurityConfigurator (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter' (OnClassCondition)
+         - found 'session' scope (OnWebApplicationCondition)
+
+   UserDetailsServiceAutoConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.security.authentication.AuthenticationManager,org.springframework.security.authentication.AuthenticationProvider,org.springframework.security.core.userdetails.UserDetailsService,org.springframework.security.oauth2.jwt.JwtDecoder,org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector; SearchStrategy: all) found beans of type 'org.springframework.security.core.userdetails.UserDetailsService' userServiceImpl (OnBeanCondition)
+      Matched:
+         - @ConditionalOnClass found required class 'org.springframework.security.authentication.AuthenticationManager' (OnClassCondition)
+
+   WebSecurityEnablerConfiguration:
+      Did not match:
+         - @ConditionalOnMissingBean (names: springSecurityFilterChain; SearchStrategy: all) found beans named springSecurityFilterChain (OnBeanCondition)
+      Matched:
+         - found 'session' scope (OnWebApplicationCondition)
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+

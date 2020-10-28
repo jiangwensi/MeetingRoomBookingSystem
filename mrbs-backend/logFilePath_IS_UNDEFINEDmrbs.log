@@ -1,0 +1,44 @@
+2020-10-28 14:44:55,382 [background-preinit] INFO   o.h.validator.internal.util.Version - HV000001: Hibernate Validator 6.1.5.Final
+2020-10-28 14:44:55,398 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - Starting MeetingRoomBookingSystemApplication on DESKTOP-40A7GOP with PID 6780 (D:\MyProjects\mrbs\sourcecodes\mrbs-backend\target\classes started by jwswe in D:\MyProjects\mrbs\sourcecodes\mrbs-backend)
+2020-10-28 14:44:55,398 [restartedMain] DEBUG  c.j.m.MeetingRoomBookingSystemApplication - Running with Spring Boot v2.3.3.RELEASE, Spring v5.2.8.RELEASE
+2020-10-28 14:44:55,398 [restartedMain] INFO   c.j.m.MeetingRoomBookingSystemApplication - No active profile set, falling back to default profiles: default
+2020-10-28 14:44:55,430 [restartedMain] INFO   o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2020-10-28 14:44:55,430 [restartedMain] INFO   o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2020-10-28 14:44:55,948 [restartedMain] INFO   o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFERRED mode.
+2020-10-28 14:44:56,029 [restartedMain] INFO   o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 75ms. Found 7 JPA repository interfaces.
+2020-10-28 14:44:56,290 [restartedMain] INFO   o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@55c2b161' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-10-28 14:44:56,297 [restartedMain] INFO   o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-10-28 14:44:56,583 [restartedMain] INFO   o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2020-10-28 14:44:56,587 [restartedMain] INFO   o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2020-10-28 14:44:56,587 [restartedMain] INFO   o.a.catalina.core.StandardService - Starting service [Tomcat]
+2020-10-28 14:44:56,587 [restartedMain] INFO   o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.37]
+2020-10-28 14:44:56,589 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - Loaded Apache Tomcat Native library [1.2.24] using APR version [1.7.0].
+2020-10-28 14:44:56,589 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true].
+2020-10-28 14:44:56,589 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+2020-10-28 14:44:56,600 [restartedMain] INFO   o.a.c.core.AprLifecycleListener - OpenSSL successfully initialized [OpenSSL 1.1.1g  21 Apr 2020]
+2020-10-28 14:44:56,693 [restartedMain] INFO   o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2020-10-28 14:44:56,693 [restartedMain] INFO   o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1263 ms
+2020-10-28 14:44:56,744 [restartedMain] WARN   o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'inMemoryDatabaseShutdownExecutor' defined in class path resource [org/springframework/boot/devtools/autoconfigure/DevToolsDataSourceAutoConfiguration.class]: Unsatisfied dependency expressed through method 'inMemoryDatabaseShutdownExecutor' parameter 0; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceConfiguration$Hikari.class]: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception; nested exception is org.springframework.boot.autoconfigure.jdbc.DataSourceProperties$DataSourceBeanCreationException: Failed to determine a suitable driver class
+2020-10-28 14:44:56,746 [restartedMain] INFO   o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2020-10-28 14:44:56,755 [restartedMain] INFO   o.s.b.a.l.ConditionEvaluationReportLoggingListener - 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+2020-10-28 14:44:56,760 [restartedMain] ERROR  o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured.
+
+Reason: Failed to determine a suitable driver class
+
+
+Action:
+
+Consider the following:
+	If you want an embedded database (H2, HSQL or Derby), please put it on the classpath.
+	If you have database settings to be loaded from a particular profile you may need to activate it (no profiles are currently active).
+

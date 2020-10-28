@@ -1,22 +1,4 @@
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `createBooking`(in theFrom datetime, in theTo datetime,in theRoomId int, in theBookedBy int)
-begin
-	declare isAvail bool default false;
-	declare thePublicId text default UUID();
-    select count(*)=0 from booking b 
-	where b.room_id = theRoomId 
-	and ((b.from_time<=theFrom and theFrom<b.to_time )or( theFrom<b.from_time and b.from_time<=theTo )) for update into isAvail;
-    
-    if isAvail then
-		begin
-			insert into booking (date, from_time, to_time, public_id, booked_by, room_id) values (date(theFrom),theFrom,theTo,thePublicId,theBookedBy,theRoomId);
-        end;
-        select * from booking WHERE public_id = thePublicId;
-    end if;
-end$$
-DELIMITER ;
-
-DELIMITER $$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `clearData`()
 begin
 SET FOREIGN_KEY_CHECKS = 0; 
@@ -32,6 +14,24 @@ truncate user_role;
 truncate token;
 truncate user;
 SET FOREIGN_KEY_CHECKS = 1;
+end$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `createBooking`(in theFrom datetime, in theTo datetime,in theRoomId int, in theBookedBy int)
+begin
+	declare isAvail bool default false;
+	declare thePublicId text default UUID();
+    select count(*)=0 from booking b 
+	where b.room_id = theRoomId 
+	and ((b.from_time<=theFrom and theFrom<b.to_time )or( theFrom<b.from_time and b.from_time<=theTo )) for update into isAvail;
+    
+    if isAvail then
+		begin
+			insert into booking (date, from_time, to_time, public_id, booked_by, room_id) values (date(theFrom),theFrom,theTo,thePublicId,theBookedBy,theRoomId);
+        end;
+        select * from booking WHERE public_id = thePublicId;
+    end if;
 end$$
 DELIMITER ;
 

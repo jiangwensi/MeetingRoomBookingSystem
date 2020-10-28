@@ -7,7 +7,9 @@ import org.springframework.context.annotation.PropertySource;
  * Created by Jiang Wensi on 27/10/2020
  */
 @Configuration
-@PropertySource(value = "file:D:\\MyProjects\\mrbs\\config\\backend\\local.application.properties",
-        ignoreResourceNotFound = false)
+//@PropertySource(value = "file:D:\\MyProjects\\mrbs\\config\\backend\\local.application.properties",
+//        ignoreResourceNotFound = false)
+//@PropertySource(value = "file:D:/MyProjects/mrbs/config/backend/local.application.properties",
+//        ignoreResourceNotFound = false)
 public class AppConfiguration {
 }

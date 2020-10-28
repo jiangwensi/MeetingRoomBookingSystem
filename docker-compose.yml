@@ -1,0 +1,35 @@
+version: '3'
+services:
+  mysql:
+    container_name: mrbs_mysql
+    restart: always
+    image: 'mysql/mysql-server:8.0'
+    volumes:
+      - dbdata:/var/lib/mysql
+#      - ./.mysql-data/db:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: mrbs
+      MYSQL_USER: wensi
+      MYSQL_PASSWORD: wensi
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: root
+  api:
+    container_name: mrbs_backend
+    depends_on:
+      - mysql
+    volumes:
+      - mrbs_backend_log:/mrbs/log
+      - mrbs_backend_conf:/mrbs/config
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./mrbs-backend
+    ports:
+      - "8080:8080"
+    environment:
+      spring.datasource.url: jdbc:mysql://mysql:3306/mrbs?serverTimezone=GMT%2B8
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+volumes:
+  dbdata:
+  mrbs_backend_log:
+  mrbs_backend_conf:

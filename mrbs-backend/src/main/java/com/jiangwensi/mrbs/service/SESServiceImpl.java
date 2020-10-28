@@ -10,10 +10,13 @@ import com.jiangwensi.mrbs.dto.TokenDto;
 import com.jiangwensi.mrbs.dto.UserDto;
 import com.jiangwensi.mrbs.entity.TokenEntity;
 import com.jiangwensi.mrbs.enumeration.TokenType;
+import com.jiangwensi.mrbs.exception.InvalidInputException;
 import com.jiangwensi.mrbs.exception.NotFoundException;
+import com.jiangwensi.mrbs.exception.UnknownErrorException;
 import com.jiangwensi.mrbs.repo.TokenRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,7 @@ import java.util.List;
  * Created by Jiang Wensi on 16/8/2020
  */
 @Service
+@Slf4j
 public class SESServiceImpl implements SESService {
 
     UserRepository userRepository;
@@ -88,8 +92,8 @@ public class SESServiceImpl implements SESService {
 
         TokenDto token = retrieveToken(userDto);
 
-        if(token==null){
-            throw new NotFoundException("Verification token is not found for email "+userDto.getEmail());
+        if (token == null) {
+            throw new NotFoundException("Verification token is not found for email " + userDto.getEmail());
         }
 
         String endpoint = "http://localhost:8080/users/verify-email?token=$token";
@@ -100,7 +104,9 @@ public class SESServiceImpl implements SESService {
     }
 
     public void loadProperties() {
-        from = appProperties.getProperty(PropKeyConst.EMAIL_FROM);
+        from = appProperties.getProperty("email.from");
+        System.setProperty("aws.accessKeyId", appProperties.getProperty(PropKeyConst.AWS_ACCESS_KEY_ID));
+        System.setProperty("aws.secretKey", appProperties.getProperty(PropKeyConst.AWS_SECRET_KEY));
     }
 
     public TokenDto retrieveToken(UserDto userDto) {
@@ -109,7 +115,7 @@ public class SESServiceImpl implements SESService {
         for (String tokenStr : tokens) {
             TokenEntity tokenEntity = tokenRepository.findByToken(tokenStr);
             if (tokenEntity.getType().equals(TokenType.VERIFY_EMAIL.name())) {
-               return MyModelMapper.userEntityToUserDtoModelMapper().map(tokenEntity,TokenDto.class);
+                return MyModelMapper.userEntityToUserDtoModelMapper().map(tokenEntity, TokenDto.class);
             }
         }
         return null;
@@ -117,7 +123,7 @@ public class SESServiceImpl implements SESService {
     }
 
     private void sendEmail(UserDto userDto, String endpoint, String subject, String htmlBody, String htmlText,
-                          TokenDto token) {
+                           TokenDto token) {
         try {
             AmazonSimpleEmailService client =
                     AmazonSimpleEmailServiceClientBuilder.standard()
@@ -126,15 +132,15 @@ public class SESServiceImpl implements SESService {
                             .withRegion(Regions.AP_SOUTHEAST_1).build();
             SendEmailRequest request = new SendEmailRequest()
                     .withDestination(
-                            new Destination().withToAddresses(userDto.getEmail()).withCcAddresses(appProperties.getProperty("email.from")))
+                            new Destination().withToAddresses(userDto.getEmail()).withCcAddresses(from))
                     .withMessage(new Message()
                             .withBody(new Body()
                                     .withHtml(new Content()
                                             .withCharset("UTF-8").withData(htmlBody.replace("$name", userDto.getName()).replace(
-                                                    "$link", token.getReturnUrl()+"?token="+token.getToken())))
+                                                    "$link", token.getReturnUrl() + "?token=" + token.getToken())))
                                     .withText(new Content()
-                                            .withCharset("UTF-8").withData(htmlText.replace("$name",  userDto.getName()).replace(
-                                                    "$link", token.getReturnUrl()+"?token="+token.getToken()))))
+                                            .withCharset("UTF-8").withData(htmlText.replace("$name", userDto.getName()).replace(
+                                                    "$link", token.getReturnUrl() + "?token=" + token.getToken()))))
                             .withSubject(new Content()
                                     .withCharset("UTF-8").withData(subject)))
                     .withSource(from);
@@ -142,17 +148,20 @@ public class SESServiceImpl implements SESService {
             client.sendEmail(request);
             System.out.println("Email sent!");
         } catch (Exception ex) {
-            System.out.println("The email was not sent. Error message: "
-                    + ex.getMessage());
+            log.error("Failed to send email.", ex);
+            throw new UnknownErrorException("Unable to send out email. Please try again later");
         }
     }
 
     @Override
     public void sendResetForgottenPasswordTokenEmail(UserDto userDto, TokenDto tokenDto) {
+        if (userDto == null) {
+            throw new InvalidInputException("This user doesn't exist in the system. Please sign up.");
+        }
 
         loadProperties();
 
-        String subject = "Reset Forgotten Password for Your Account in Meeting Room Booking System";
+        String subject = "[MRBS] Reset Forgotten Password for Your Account in Meeting Room Booking System";
         String htmlBody = "<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
                 "<head>\n" +
