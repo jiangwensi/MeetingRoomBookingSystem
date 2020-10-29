@@ -13,4 +13,14 @@ after_success:
   - docker push jiangwensi/mrbs-backend
   - docker push jiangwensi/mrbs-ui
 
-after_script:
+deploy:
+  provider: elasticbeanstalk
+  region: ap-southeast-1
+  app: mrbs-docker
+  env: MrbsDocker-env
+  bucket_name: elasticbeanstalk-ap-southeast-1-982031636351
+  bucket_patch: mrbs
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
