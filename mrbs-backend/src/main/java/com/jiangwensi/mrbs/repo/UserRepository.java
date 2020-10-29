@@ -28,7 +28,7 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             "select u.* from user u " +
                     "where u.active in (:active) " +
                     "and u.email_verified in (:verified) " +
-                    "and u.name like %:name% " +
+                    "and u.name like concat('%',:name,'%') " +
                     "and u.id in " +
                     "(select ur.user_id from user_role ur " +
                     "where ur.role_id in " +
@@ -43,7 +43,7 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             "select u.* from user u " +
                     "where u.active in (:active) " +
                     "and u.email_verified in (:verified) " +
-                    "and upper(u.email) like %:email% " +
+                    "and upper(u.email) like concat('%',:email,'%') " +
                     "and u.id in " +
                     "(select ur.user_id from user_role ur " +
                     "where ur.role_id in " +
@@ -58,8 +58,8 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             "select u.* from user u " +
                     "where u.active in (:active) " +
                     "and u.email_verified in (:verified) " +
-                    "and u.email like %:email% " +
-                    "and u.name like %:name% " +
+                    "and u.email like concat('%',:email,'%') " +
+                    "and u.name like concat('%',:name,'%') " +
                     "and u.id in " +
                     "(select ur.user_id from user_role ur " +
                     "where ur.role_id in " +

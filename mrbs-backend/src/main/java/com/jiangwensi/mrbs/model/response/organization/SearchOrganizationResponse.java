@@ -9,13 +9,13 @@ import java.util.List;
  * Created by Jiang Wensi on 24/8/2020
  */
 public class SearchOrganizationResponse extends GeneralResponse {
-    List<SearchOrganizationResponseItem> organizations = new ArrayList<>();
+    List<OrganizationResponse> organizations = new ArrayList<>();
 
-    public List<SearchOrganizationResponseItem> getOrganizations() {
+    public List<OrganizationResponse> getOrganizations() {
         return organizations;
     }
 
-    public void setOrganizations(List<SearchOrganizationResponseItem> organizations) {
+    public void setOrganizations(List<OrganizationResponse> organizations) {
         this.organizations = organizations;
     }
 }

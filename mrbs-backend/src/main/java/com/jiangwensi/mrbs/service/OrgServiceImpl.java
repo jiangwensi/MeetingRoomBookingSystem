@@ -10,7 +10,6 @@ import com.jiangwensi.mrbs.exception.NotFoundException;
 import com.jiangwensi.mrbs.model.request.org.OrganizationRequest;
 import com.jiangwensi.mrbs.repo.BookingRepository;
 import com.jiangwensi.mrbs.repo.OrgRepository;
-import com.jiangwensi.mrbs.repo.RoomRepository;
 import com.jiangwensi.mrbs.repo.UserRepository;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
@@ -29,21 +28,16 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class OrgServiceImpl implements OrgService {
-    private OrgRepository organizationRepository;
-    private BookingRepository bookingRepos;
-    private UserRepository userRepository;
-    private RoomRepository roomRepository;
-    @Autowired
-    private UserService userService;
+    private final OrgRepository organizationRepository;
+    private final BookingRepository bookingRepos;
+    private final UserRepository userRepository;
     @Autowired
     private RoomService roomService;
 
-    public OrgServiceImpl(OrgRepository organizationRepository, BookingRepository bookingRepos, UserRepository userRepository, RoomRepository roomRepository) {
+    public OrgServiceImpl(OrgRepository organizationRepository, BookingRepository bookingRepos, UserRepository userRepository) {
         this.organizationRepository = organizationRepository;
         this.bookingRepos = bookingRepos;
         this.userRepository = userRepository;
-        this.roomRepository = roomRepository;
-        this.roomService = roomService;
     }
 
     @Override

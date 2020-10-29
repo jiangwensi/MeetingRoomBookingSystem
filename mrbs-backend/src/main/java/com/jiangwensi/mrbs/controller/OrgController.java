@@ -9,7 +9,6 @@ import com.jiangwensi.mrbs.model.request.org.OrganizationRequest;
 import com.jiangwensi.mrbs.model.response.GeneralResponse;
 import com.jiangwensi.mrbs.model.response.organization.OrganizationResponse;
 import com.jiangwensi.mrbs.model.response.organization.SearchOrganizationResponse;
-import com.jiangwensi.mrbs.model.response.organization.SearchOrganizationResponseItem;
 import com.jiangwensi.mrbs.model.response.room.SearchRoomResponse;
 import com.jiangwensi.mrbs.model.response.room.SearchRoomResponseItem;
 import com.jiangwensi.mrbs.model.response.user.ListUserResponse;
@@ -35,7 +34,7 @@ import java.util.List;
 @Scope("request")
 public class OrgController {
 
-    private OrgService orgService;
+    private final OrgService orgService;
 
     public OrgController(OrgService orgService) {
         this.orgService = orgService;
@@ -51,8 +50,8 @@ public class OrgController {
         SearchOrganizationResponse returnValue = new SearchOrganizationResponse();
 
         organizationDtos.forEach(o-> {
-            SearchOrganizationResponseItem organization = new SearchOrganizationResponseItem();
-            MyModelMapper.organizationDtoToOrganizationSearchResponseItemModelMapper().map(o,organization);
+            OrganizationResponse organization = new OrganizationResponse();
+            MyModelMapper.organizatioDtoToOrganizationResponseModelMapper().map(o,organization);
             returnValue.getOrganizations().add(organization);
         });
         returnValue.setStatus(MyResponseStatus.success.name());

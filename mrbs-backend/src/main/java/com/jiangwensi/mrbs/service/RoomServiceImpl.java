@@ -32,11 +32,11 @@ import java.util.List;
 @Slf4j
 public class RoomServiceImpl implements RoomService {
 
-    private RoomRepository roomRepo;
-    private UserRepository userRepo;
-    private OrgRepository orgRepo;
-    private BlockTimeslotRepo blockTimeslotRepo;
-    private BookingRepository bookingRepo;
+    private final RoomRepository roomRepo;
+    private final UserRepository userRepo;
+    private final OrgRepository orgRepo;
+    private final BlockTimeslotRepo blockTimeslotRepo;
+    private final BookingRepository bookingRepo;
 
     @Autowired
     private UserService userService;
@@ -112,7 +112,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public RoomDto createRoom(RoomRequest request, MultipartFile[] roomImages) throws IOException {
+    public void createRoom(RoomRequest request, MultipartFile[] roomImages) throws IOException {
 
 
         String name = request.getName();
@@ -188,7 +188,6 @@ public class RoomServiceImpl implements RoomService {
         ModelMapper mm = MyModelMapper.roomEntityToDtoModelMapper();
         mm.map(roomEntity, returnValue);
 
-        return returnValue;
     }
 
 

@@ -9,7 +9,7 @@ import java.util.List;
  * Created by Jiang Wensi on 6/9/2020
  */
 public class AvailableTimeslotResponse extends GeneralResponse {
-    List<AvailableTimeslot> availableTimeslots = new ArrayList();
+    private List<AvailableTimeslot> availableTimeslots = new ArrayList();
 
     public List<AvailableTimeslot> getAvailableTimeslots() {
         return availableTimeslots;

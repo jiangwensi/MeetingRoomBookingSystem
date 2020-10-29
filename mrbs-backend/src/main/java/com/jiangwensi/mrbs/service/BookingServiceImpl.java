@@ -37,10 +37,10 @@ import java.util.List;
  */
 @Service
 public class BookingServiceImpl implements BookingService {
-    private BookingRepository bookingRepo;
-    private UserService userService;
-    private UserRepository userRepository;
-    private RoomRepository roomRepository;
+    private final BookingRepository bookingRepo;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
 
     public BookingServiceImpl(BookingRepository bookingRepo, UserService userService, UserRepository userRepository, RoomRepository roomRepository) {
         this.bookingRepo = bookingRepo;
@@ -173,13 +173,13 @@ public class BookingServiceImpl implements BookingService {
                 auth.getAuthorities().contains(new SimpleGrantedAuthority("SYSADM"));
 
 
-        if(date!=null && date!=""){
+        if(date!=null && !date.equals("")){
             if(MyDateUtils.isValidFormat(date)) {
                 throw new InvalidInputException("Invalid date format " + date);
             }
         }
 
-        List<BookingEntity> bookingEntities = new ArrayList<>();
+        List<BookingEntity> bookingEntities;
 
         if(isSysAdm){
             bookingEntities = bookingRepo.searchBySysAdm(roomPublicId, date);
@@ -209,10 +209,7 @@ public class BookingServiceImpl implements BookingService {
 
     public Boolean clash(String roomId, String from, String to) {
         List<BookingEntity> result = bookingRepo.checkClash(roomId, from, to);
-        if (result != null && result.size() > 0) {
-            return true;
-        }
-        return false;
+        return result != null && result.size() > 0;
     }
 
     private String getTimeFormat() {

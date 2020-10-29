@@ -6,7 +6,7 @@ before_install:
 install: skip
 before_script:
 script:
-  - mvn clean package
+  - mvn -f mrbs-backend clean package
 
 after_success:
   - docker build -t jiangwensi/mrbs-backend ./mrbs-backend

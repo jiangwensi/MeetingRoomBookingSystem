@@ -23,7 +23,7 @@ import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @Scope("request")
 public class RoleController {
-    private RoleService roleService;
+    private final RoleService roleService;
 
     public RoleController(RoleService roleService) {
         this.roleService = roleService;

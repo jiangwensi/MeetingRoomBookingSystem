@@ -11,7 +11,7 @@ public class BaseController {
     protected GeneralResponse generalSuccessResponse(String message){
         GeneralResponse returnValue = new GeneralResponse();
         returnValue.setStatus(MyResponseStatus.success.name());
-        returnValue.setMessage("Request is successful");
+        returnValue.setMessage(message);
         return returnValue;
     }
 }

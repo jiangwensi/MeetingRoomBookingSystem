@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.*;
 @Scope("request")
 public class AuthController {
 
-    private Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
     @Autowired
     private UserService userService;
 

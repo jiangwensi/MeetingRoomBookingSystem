@@ -10,7 +10,6 @@ import com.jiangwensi.mrbs.model.request.user.UpdateUserRequest;
 import com.jiangwensi.mrbs.model.response.GeneralResponse;
 import com.jiangwensi.mrbs.model.response.user.SearchUserResponse;
 import com.jiangwensi.mrbs.model.response.user.UserResponse;
-import com.jiangwensi.mrbs.service.TokenService;
 import com.jiangwensi.mrbs.service.UserService;
 import com.jiangwensi.mrbs.utils.MyModelMapper;
 import com.jiangwensi.mrbs.utils.MyStringUtils;
@@ -21,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.jiangwensi.mrbs.service.SESService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,13 +35,11 @@ import java.util.List;
 @Scope("request")
 public class UserController {
 
-    private UserService userService;
-    private TokenService tokenService;
-    private com.jiangwensi.mrbs.service.SESService SESService;
+    private final UserService userService;
+    private final SESService SESService;
 
-    public UserController(UserService userService, TokenService tokenService, com.jiangwensi.mrbs.service.SESService SESService) {
+    public UserController(UserService userService, SESService SESService) {
         this.userService = userService;
-        this.tokenService = tokenService;
         this.SESService = SESService;
     }
 

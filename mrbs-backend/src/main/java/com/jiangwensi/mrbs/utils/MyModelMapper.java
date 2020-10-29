@@ -3,7 +3,6 @@ package com.jiangwensi.mrbs.utils;
 import com.jiangwensi.mrbs.dto.*;
 import com.jiangwensi.mrbs.entity.*;
 import com.jiangwensi.mrbs.model.response.organization.OrganizationResponse;
-import com.jiangwensi.mrbs.model.response.organization.SearchOrganizationResponseItem;
 import com.jiangwensi.mrbs.model.response.room.RoomResponse;
 import com.jiangwensi.mrbs.model.response.user.UserResponse;
 import org.modelmapper.Converter;
@@ -128,29 +127,6 @@ public class MyModelMapper {
         return mm;
     }
 
-    public static ModelMapper organizationDtoToOrganizationSearchResponseItemModelMapper() {
-        Converter<OrganizationDto, SearchOrganizationResponseItem> converter =
-                new Converter<OrganizationDto, SearchOrganizationResponseItem>() {
-                    @Override
-                    public SearchOrganizationResponseItem convert(MappingContext<OrganizationDto, SearchOrganizationResponseItem> context) {
-                        OrganizationDto s = context.getSource();
-                        SearchOrganizationResponseItem d = context.getDestination();
-
-                        d.setPublicId(s.getPublicId());
-                        d.setName(s.getName());
-                        d.setActive(s.isActive());
-                        d.setDescription(s.getDescription());
-                        d.setAdmins(s.getAdmins());
-                        d.setRooms(s.getRooms());
-
-                        return d;
-                    }
-                };
-        ModelMapper mm = new ModelMapper();
-        mm.addConverter(converter);
-        return mm;
-    }
-
     public static ModelMapper organizatioDtoToOrganizationResponseModelMapper() {
         Converter<OrganizationDto, OrganizationResponse> converter =
                 new Converter<OrganizationDto, OrganizationResponse>() {
@@ -192,7 +168,7 @@ public class MyModelMapper {
                 List<BookingEntity> bookingEntities = s.getBookings();
                 if(bookingEntities!=null){
                     bookingEntities.forEach(e->bookings.add(e.getPublicId()));
-                };
+                }
                 d.setBookings(bookings);
 
                 List<String> admins = new ArrayList<>();
@@ -228,8 +204,6 @@ public class MyModelMapper {
                 if(roomImageEntities!=null){
                     for(RoomImageEntity e: roomImageEntities){
                         RoomImageDto dto = new RoomImageDto();
-                        System.out.println(e.getImage());
-                        System.out.println(Base64.getEncoder().encodeToString(e.getImage()));
                         dto.setImage(Base64.getEncoder().encodeToString(e.getImage()));
                         dto.setId(e.getPublicId());
                         roomImageDtos.add(dto);

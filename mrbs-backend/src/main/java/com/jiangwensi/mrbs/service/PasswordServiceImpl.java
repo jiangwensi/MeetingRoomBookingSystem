@@ -23,9 +23,9 @@ import java.util.List;
 @Service
 @Slf4j
 public class PasswordServiceImpl implements PasswordService{
-    private UserRepository userRepository;
-    private TokenRepository tokenRepository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public PasswordServiceImpl(UserRepository userRepository, TokenRepository tokenRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
@@ -47,7 +47,7 @@ public class PasswordServiceImpl implements PasswordService{
         TokenEntity obsoleteToken = null;
         List<TokenEntity> tokens = userEntity.getTokens();
         for(TokenEntity tokenEntity:tokens){
-            if(tokenEntity.getType().equals(TokenType.RESET_FORGOTTEN_PASSWORD)){
+            if(tokenEntity.getType().equals(TokenType.RESET_FORGOTTEN_PASSWORD.name())){
                 obsoleteToken = tokenEntity;
                 break;
             }
@@ -78,8 +78,4 @@ public class PasswordServiceImpl implements PasswordService{
         return matches;
     }
 
-    @Override
-    public void removeResetPasswordToken(String email) {
-
-    }
 }

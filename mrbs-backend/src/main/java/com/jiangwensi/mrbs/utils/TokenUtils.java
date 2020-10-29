@@ -18,7 +18,7 @@ import java.util.Date;
 @Component
 public class TokenUtils {
 
-    static Logger logger = LoggerFactory.getLogger(TokenUtils.class);
+    static final Logger logger = LoggerFactory.getLogger(TokenUtils.class);
 
     public static String generateToken(String subject, long validity) {
         Date expiry = new Date(new Date().getTime() + validity);

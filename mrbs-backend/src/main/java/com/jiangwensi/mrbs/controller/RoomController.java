@@ -42,8 +42,8 @@ import java.util.List;
 @Scope("request")
 public class RoomController extends BaseController {
 
-    RoomService roomService;
-    OrgService orgService;
+    final RoomService roomService;
+    final OrgService orgService;
 
     public RoomController(RoomService roomService, OrgService orgService) {
         this.roomService = roomService;
@@ -145,7 +145,7 @@ public class RoomController extends BaseController {
 
         RoomUserResponse returnValue = new RoomUserResponse();
         String action = MyStringUtils.toUpperCaseAndTrim(request.getAction());
-        List<UserDto> userDtos = new ArrayList<UserDto>();
+        List<UserDto> userDtos;
         switch (action) {
             case "list":
                 userDtos = roomService.listEnrolledUsers(roomId);

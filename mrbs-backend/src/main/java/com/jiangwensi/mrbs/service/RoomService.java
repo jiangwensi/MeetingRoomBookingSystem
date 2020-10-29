@@ -23,7 +23,7 @@ public interface RoomService {
 //                       List<String> admins,List<BlockedTimeSlot> blockedTimeslots);
 
     @Transactional
-    RoomDto createRoom(RoomRequest request, MultipartFile[] roomImages) throws IOException;
+    void createRoom(RoomRequest request, MultipartFile[] roomImages) throws IOException;
 
     RoomDto updateRoom(RoomRequest request);
 

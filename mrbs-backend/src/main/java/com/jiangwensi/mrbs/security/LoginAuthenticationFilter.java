@@ -29,8 +29,8 @@ import java.util.Set;
  */
 public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private Logger logger = LoggerFactory.getLogger(LoginAuthenticationFilter.class);
-    private AuthenticationManager authenticationManager;
+    private final Logger logger = LoggerFactory.getLogger(LoginAuthenticationFilter.class);
+    private final AuthenticationManager authenticationManager;
 
     public LoginAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -40,7 +40,7 @@ public class LoginAuthenticationFilter extends UsernamePasswordAuthenticationFil
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
         logger.debug("attemptAuthentication() is called");
-        LoginRequest loginRequestModel = null;
+        LoginRequest loginRequestModel;
         try {
             loginRequestModel = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
         } catch (IOException e) {

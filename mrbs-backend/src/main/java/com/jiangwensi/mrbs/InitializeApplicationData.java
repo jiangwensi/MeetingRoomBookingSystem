@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 public class InitializeApplicationData {
 
-    Logger logger = LoggerFactory.getLogger(InitializeApplicationData.class);
+    final Logger logger = LoggerFactory.getLogger(InitializeApplicationData.class);
 
     @Autowired
     RoleRepository roleRepository;

@@ -23,8 +23,8 @@ import javax.transaction.Transactional;
 @Slf4j
 public class TokenServiceImpl implements TokenService {
 
-    TokenRepository tokenRepository;
-    UserRepository userRepository;
+    final TokenRepository tokenRepository;
+    final UserRepository userRepository;
 
     public TokenServiceImpl(TokenRepository tokenRepository, UserRepository userRepository) {
         this.tokenRepository = tokenRepository;

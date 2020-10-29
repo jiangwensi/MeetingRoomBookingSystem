@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppContext implements ApplicationContextAware {
 
-    Logger logger = LoggerFactory.getLogger(AppContext.class);
+    final Logger logger = LoggerFactory.getLogger(AppContext.class);
 
     @Autowired
     private static ApplicationContext context;
@@ -22,7 +22,7 @@ public class AppContext implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         logger.debug("setApplicationContext is called");
-        this.context = applicationContext;
+        context = applicationContext;
     }
 
     public static ApplicationContext getContext() {

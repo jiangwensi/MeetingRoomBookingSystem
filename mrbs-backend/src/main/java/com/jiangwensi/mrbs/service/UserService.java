@@ -14,11 +14,11 @@ public interface UserService extends UserDetailsService {
 
     UserDto createUser(String name, String email, String password,String returnUrl);
 
-    UserDto emailVerified(String email);
+    void emailVerified(String email);
 
     UserDto regenerateEmailVerifyToken(String name, String email, String password, String returnUrl);
 
-    UserDto updatePassword(String email, String password);
+    void updatePassword(String email, String password);
 
 
     List<UserDto> search(String name, String email, List<String> role, List<Boolean> active,

@@ -40,13 +40,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
-    private TokenRepository tokenRepository;
-    private RoleRepository roleRepository;
-    private OrgRepository orgRepository;
-    private RoomRepository roomRepo;
-    private BCryptPasswordEncoder encoder;
-    private BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
+    private final RoleRepository roleRepository;
+    private final OrgRepository orgRepository;
+    private final RoomRepository roomRepo;
+    private final BCryptPasswordEncoder encoder;
+    private final BookingRepository bookingRepository;
 
     @Autowired
     private RoleService roleService;
@@ -150,13 +150,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updatePassword(String email, String password) {
+    public void updatePassword(String email, String password) {
         UserEntity userEntity = userRepository.findByEmail(email);
         userEntity.setPassword(encoder.encode(password));
         UserEntity updatedUserEntity = userRepository.save(userEntity);
         UserDto returnValue = new UserDto();
         new ModelMapper().map(updatedUserEntity, returnValue);
-        return returnValue;
     }
 
     @Override
@@ -178,7 +177,7 @@ public class UserServiceImpl implements UserService {
         if (role == null || role.size() == 0) {
             role = new ArrayList<>();
             List<String> roleOptions = roleService.listAllRoles();
-            roleOptions.forEach(role::add);
+            role.addAll(roleOptions);
         }
         if (active == null || active.size() == 0) {
             active = new ArrayList<>();
@@ -215,7 +214,7 @@ public class UserServiceImpl implements UserService {
         if (userEntities != null && userEntities.size() > 0) {
             for (UserEntity e : userEntities) {
                 UserDto userDto = new UserDto();
-                if (verbose == null || verbose == false) {
+                if (verbose == null || !verbose) {
                     e.setBookings(null);
                     e.setIsAdminOfOrganizations(null);
                     e.setIsAdminOfRooms(null);
@@ -321,11 +320,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto emailVerified(String email) {
+    public void emailVerified(String email) {
         UserEntity userEntity = userRepository.findByEmail(email);
         userEntity.setEmailVerified(true);
         userRepository.save(userEntity);
-        return null;
     }
 
     @Override
@@ -407,10 +405,7 @@ public class UserServiceImpl implements UserService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserEntity userEntity = userRepository.findByEmail(auth.getName());
         BookingEntity bookingEntity = bookingRepository.findByPublicId(bookingId);
-        if (userEntity.getId() == bookingEntity.getBookedBy().getId()) {
-            return true;
-        }
-        return false;
+        return userEntity.getId() == bookingEntity.getBookedBy().getId();
     }
 
 
