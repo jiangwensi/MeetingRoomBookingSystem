@@ -19,7 +19,7 @@ deploy:
   provider: elasticbeanstalk
   region: ap-southeast-1
   app: mrbs-docker
-  env: MrbsDocker-env
+  env: MrbsDocker-env-1
   bucket_name: elasticbeanstalk-ap-southeast-1-982031636351
   bucket_patch: mrbs
   on:
