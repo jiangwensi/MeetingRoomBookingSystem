@@ -1,0 +1,19 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions":[
+    {
+      "name": "api",
+      "image": "jiangwensi/mrbs-backend",
+      "hostname": "api",
+      "essential": "yes",
+      "memory": 128
+    },
+    {
+      "name": "ui",
+      "image": "jiangwensi/mrbs-ui",
+      "hostname": "ui",
+      "essential": "yes",
+      "memory": 128
+    }
+  ]
+}

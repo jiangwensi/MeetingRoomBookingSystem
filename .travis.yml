@@ -2,9 +2,25 @@ language: generic
 sudo: required
 services:
   - docker
+before_install:
+install: skip
+before_script:
+script:
 after_success:
   - docker build -t jiangwensi/mrbs-backend ./mrbs-backend
   - docker build -t jiangwensi/mrbs-ui ./mrbs-ui
   - echo "$DOCKER_PASSWORD" |docker login -u "$DOKCER_ID" --password-stdin
   - docker push jiangwensi/mrbs-backend
   - docker push jiangwensi/mrbs-ui
+deploy:
+  provider: elasticbeanstalk
+  region: ap-southeast-1
+  app: mrbs-docker
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-ap-southeast-1-982031636351
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+after_script:
