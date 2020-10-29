@@ -1,4 +1,0 @@
-2020-10-28 09:56:07,466 [SpringContextShutdownHook] INFO   o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
-2020-10-28 09:56:07,469 [SpringContextShutdownHook] INFO   o.s.s.c.ThreadPoolTaskExecutor - Shutting down ExecutorService 'applicationTaskExecutor'
-2020-10-28 09:56:07,469 [SpringContextShutdownHook] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
-2020-10-28 09:56:07,475 [SpringContextShutdownHook] INFO   com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
