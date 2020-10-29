@@ -7,8 +7,6 @@ install: skip
 before_script:
 script:
   - mvn -f mrbs-backend clean package
-
-after_script:
   - docker build -t jiangwensi/mrbs-backend ./mrbs-backend
   - docker build -t jiangwensi/mrbs-ui ./mrbs-ui
   - echo "$DOCKER_PASSWORD" |docker login -u "$DOKCER_ID" --password-stdin
