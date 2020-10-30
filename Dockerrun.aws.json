@@ -6,7 +6,20 @@
       "image": "jiangwensi/mrbs-backend",
       "hostname": "api",
       "essential": true,
-      "memory": 128
+      "memory": 128,
+      "volumes": [
+        {
+          "name": "mrbs_backend_log",
+          "host": {
+            "sourcePath": "/mrbs/log"
+          }
+        },{
+          "name": "mrbs_backend_conf",
+          "host": {
+            "sourcePath": "/mrbs/config"
+          }
+        }
+      ]
     },
     {
       "name": "ui",
