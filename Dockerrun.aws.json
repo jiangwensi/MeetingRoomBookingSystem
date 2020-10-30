@@ -33,6 +33,22 @@
         "HostPort": 3000
       }
     ]
+    },
+    {
+      "name":"nginx",
+      "image":"jiangwensi/mrbs-nginx",
+      "hostname":"nginx",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": [
+        "ui"
+      ],
+      "memory": 128
     }
   ]
 }

@@ -1,5 +1,12 @@
 version: '3'
 services:
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - '80:80'
   mysql:
     container_name: mrbs_mysql
     restart: always
