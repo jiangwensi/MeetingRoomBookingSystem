@@ -5,7 +5,7 @@
       "name": "api",
       "image": "jiangwensi/mrbs-backend",
       "hostname": "api",
-      "essential": true,
+      "essential": false,
       "memory": 128,
       "volumes": [
         {
