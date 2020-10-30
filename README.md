@@ -10,5 +10,5 @@ MySQL<br/>
 <i>Framework</i>:<br/>
 React, Material UI, Spring Boot, Spring MVC, Spring Rest<br/>
 
-<b>App Screenshots</b>:<br/>
+<b>App Presentation</b>: <br/>Use Cases, Architecture Diagram, ERD, and UI<br/>
 <a href="https://1drv.ms/p/s!Ajr6t8lf42dOgVIYrPafyPPFKuu2?e=1fL9DJ">Click Here</a>
