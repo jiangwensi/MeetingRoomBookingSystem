@@ -4,4 +4,4 @@ ARG JAR_FILE=target/*jar
 COPY ${JAR_FILE} ./app.jar
 EXPOSE 8080
 #ENTRYPOINT ["java","-jar","./app.jar","--spring.config.additional-location=./config/local.application.properties"]
-CMD java -jar ./app.jar
+CMD java -jar ./app.jar || tail -f /dev/null
