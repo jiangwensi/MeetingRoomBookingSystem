@@ -7,17 +7,11 @@
       "hostname": "api",
       "essential": false,
       "memory": 128,
-      "volumes": [
+      "mountPoints": [
         {
-          "name": "mrbs_backend_log",
-          "host": {
-            "sourcePath": "/mrbs/log"
-          }
-        },{
-          "name": "mrbs_backend_conf",
-          "host": {
-            "sourcePath": "/mrbs/config"
-          }
+          "sourceVolume": "mrbs_backend_log",
+          "containerPath": "/mrbs/log",
+          "readOnly": true
         }
       ]
     },
@@ -49,6 +43,14 @@
         "ui"
       ],
       "memory": 128
+    }
+  ],
+  "volumes": [
+    {
+      "name": "mrbs_backend_log",
+      "host": {
+        "sourcePath": "/home/ec2-user/mrbs_backend_log"
+      }
     }
   ]
 }
