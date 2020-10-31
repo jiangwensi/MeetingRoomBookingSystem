@@ -16,7 +16,7 @@ public class AppContext implements ApplicationContextAware {
 
     final Logger logger = LoggerFactory.getLogger(AppContext.class);
 
-    @Autowired
+//    @Autowired
     private static ApplicationContext context;
 
     @Override
