@@ -3,7 +3,7 @@ services:
   nginx:
     restart: always
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       context: ./nginx
     ports:
       - '80:80'
@@ -30,7 +30,7 @@ services:
       - mrbs_backend_log:/mrbs/log
       - mrbs_backend_conf:/mrbs/config
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       context: ./mrbs-backend
     ports:
       - "8080:8080"
@@ -42,7 +42,7 @@ services:
     container_name: mrbs_ui
     stdin_open: true
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       context: ./mrbs-ui
     ports:
       - "3000:3000"
