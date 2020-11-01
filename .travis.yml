@@ -19,7 +19,8 @@ deploy:
   skip_cleanup: true
   provider: elasticbeanstalk
   region: ap-southeast-1
-  app: mrbs-docker
+  #app: mrbs-docker
+  app: mrbs
   env: Mrbs-env-3
   bucket_name: elasticbeanstalk-ap-southeast-1-982031636351
   bucket_patch: mrbs
