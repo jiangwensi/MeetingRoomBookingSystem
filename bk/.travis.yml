@@ -8,12 +8,12 @@ before_script:
 script:
   - mvn -f mrbs-backend clean package
   - docker build -t jiangwensi/mrbs-backend ./mrbs-backend
-#  - docker build -t jiangwensi/mrbs-ui ./mrbs-ui
-#  - docker build -t jiangwensi/mrbs-nginx ./nginx
+  - docker build -t jiangwensi/mrbs-ui ./mrbs-ui
+  - docker build -t jiangwensi/mrbs-nginx ./nginx
   - echo "$DOCKER_PASSWORD" |docker login -u "$DOKCER_ID" --password-stdin
   - docker push jiangwensi/mrbs-backend
-#  - docker push jiangwensi/mrbs-ui
-#  - docker push jiangwensi/mrbs-nginx
+  - docker push jiangwensi/mrbs-ui
+  - docker push jiangwensi/mrbs-nginx
 
 deploy:
   provider: elasticbeanstalk
