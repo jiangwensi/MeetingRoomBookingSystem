@@ -20,6 +20,7 @@ deploy:
   region: ap-southeast-1
   app: mrbs-docker
   env: Mrbs-env-3
+  zip_file: '/mrbs/mrbs.jar'
   bucket_name: elasticbeanstalk-ap-southeast-1-982031636351
   bucket_patch: mrbs
   on:
