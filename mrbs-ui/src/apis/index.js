@@ -8,7 +8,7 @@ export const apidomain = "api";
 export const port = "";
 
 export default axios.create({
-    baseURL: 'http://' + apidomain + port + '/',
+    baseURL: 'http://' + domain + '/'+apidomain+'/',
     // headers: {
     // 	accept: 'application/json'
     // }
