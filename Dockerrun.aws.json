@@ -6,7 +6,13 @@
       "image": "jiangwensi/mrbs-backend",
       "hostname": "api",
       "essential": false,
-      "memory": 512
+      "memory": 512,
+      "Ports": [
+        {
+          "ContainerPort": 8080,
+          "HostPort": 8080
+        }
+      ]
     },
     {
       "name": "ui",
