@@ -41,11 +41,11 @@
       "dependsOn": [
         {
           "containerName": "api",
-          "condition": "SUCCESS"
+          "condition": "HEALTHY"
         },
         {
           "containerName": "ui",
-          "condition": "SUCCESS"
+          "condition": "HEALTHY"
         }
       ],
       "links": [
