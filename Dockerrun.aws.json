@@ -5,8 +5,8 @@
       "name": "api",
       "image": "jiangwensi/mrbs-backend",
       "hostname": "api",
-      "essential": false,
       "memory": 512,
+      "essential": true,
       "Ports": [
         {
           "ContainerPort": 8080,
@@ -31,15 +31,24 @@
       "name":"nginx",
       "image":"jiangwensi/mrbs-nginx",
       "hostname":"nginx",
-      "essential": true,
       "portMappings": [
         {
           "hostPort": 80,
           "containerPort": 80
         }
       ],
+      "dependsOn": [
+        {
+          "containerName": "api",
+          "condition": "SUCCESS"
+        },
+        {
+          "containerName": "ui",
+          "condition": "SUCCESS"
+        }
+      ],
       "links": [
-        "ui"
+        "ui","api"
       ],
       "memory": 128
     }
