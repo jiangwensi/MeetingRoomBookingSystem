@@ -1,7 +1,7 @@
 import * as ACTION_CONST from 'utils/const';
 import * as API_PATH_CONST from 'utils/const.js';
 import mrbsAxios from 'apis';
-import {domain} from 'apis';
+import {frontEndDomain} from 'apis';
 
 export const signUp = (name, email, password) => async (dispatch) => {
 	let payload;
@@ -10,7 +10,7 @@ export const signUp = (name, email, password) => async (dispatch) => {
 			name,
 			email,
 			password,
-			returnUrl: 'http://'+domain+':3000/verifyEmail'
+			returnUrl: 'http://'+frontEndDomain+'/verifyEmail'
 		})
 		.catch((error) => {
 			if (error.response) {
@@ -31,7 +31,7 @@ export const signUp = (name, email, password) => async (dispatch) => {
 export const requestResetForgottenPassword = (email) => async (dispatch) => {
 	let message = '';
 	let errorMessage = '';
-	let returnUrl = 'http://'+domain+':3000/resetForgottenPassword';
+	let returnUrl = 'http://'+frontEndDomain+'/resetForgottenPassword';
 
 	const response = await mrbsAxios
 		.post(API_PATH_CONST.AUTH + '/requestResetForgottenPassword', {

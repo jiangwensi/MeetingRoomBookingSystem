@@ -5,14 +5,15 @@ import axios from 'axios';
 // export const port="8080";
 // export const domain = "mrbs.jiangwensi.com";
 // prod aws elb
-export const domain = "mrbs.jiangwensi.com/api";
+export const backendDomain = "mrbs.jiangwensi.com/api";
+export const frontEndDomain = "mrbs.jiangwensi.com";
 
 // dev docker
 // export const domain = "192.168.99.100/api";
 export const port = "";
 
 export default axios.create({
-    baseURL: 'http://' + domain + '/',
+    baseURL: 'http://' + backendDomain + '/',
     // headers: {
     // 	accept: 'application/json'
     // }

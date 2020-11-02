@@ -1,7 +1,7 @@
 import * as ACTION_CONST from 'utils/const';
 import * as API_PATH_CONST from 'utils/const';
 import mrbsAxios from 'apis';
-import {domain} from 'apis';
+import {frontEndDomain} from 'apis';
 import qs from 'qs';
 
 export const searchUser = (authToken, name, email, roles, actives, verifies,verbose) => async (dispatch) => {
@@ -128,7 +128,7 @@ export const viewUser = (authToken, publicId) => async (dispatch) => {
 
 export const updateMyProfile = (authToken, publicId, name, email) => async (dispatch) => {
 	let payload = {};
-	let returnUrl = 'http://'+domain+':3000/verifyEmail';
+	let returnUrl = 'http://'+frontEndDomain+'/verifyEmail';
 	const response = await mrbsAxios
 		.patch(
 			'/myprofile/update',
