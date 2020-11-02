@@ -16,7 +16,7 @@ script:
   - docker push jiangwensi/mrbs-nginx
 
 deploy:
-  skip_cleanup: true
+#  skip_cleanup: true
   provider: elasticbeanstalk
   region: ap-southeast-1
   #app: mrbs-docker
