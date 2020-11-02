@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -34,6 +35,7 @@ public class PasswordServiceImpl implements PasswordService{
     }
 
     @Override
+    @Transactional
     public TokenDto generateResetPasswordToken(String email,String returnUrl) {
         TokenDto returnValue = new TokenDto();
         if(StringUtils.isEmpty(email)){
